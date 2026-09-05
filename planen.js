@@ -1,0 +1,361 @@
+(() => {
+  const LS_KEY = "etfplaner.v1";
+  const DEFAULT_RATES = Object.fromEntries(ETFS.map(e => [e.id, e.defaultRate]));
+
+  const state = load() || {
+    purchases: [],
+    holdings: [],
+    rates: Object.assign({}, DEFAULT_RATES)
+  };
+  let overlayCol = null;
+  let pinnedCol = null;
+  let lastProj = null;
+  let projLabels = [];
+
+  function normalizeRows(r) {
+    if (Array.isArray(r)) return r.filter(x => x && typeof x === "object").map(x => ({ q: String(x.q || ""), v: Math.max(0, Number(x.v) || 0) }));
+    const out = [];
+    if (r && typeof r === "object") for (const [k, v] of Object.entries(r)) {
+      const e = ETFS.find(x => x.id === k);
+      if (e && Number(v) > 0) out.push({ q: e.wkn, v: Number(v) });
+    }
+    return out;
+  }
+  function toRowArray(rows) {
+    return rows.filter(r => r && String(r.q || "").trim()).map(r => ({ q: String(r.q), v: Number(r.v) || 0 }));
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      return {
+        purchases: normalizeRows(s.purchases),
+        holdings: normalizeRows(s.holdings),
+        rates: Object.assign({}, DEFAULT_RATES, s.rates)
+      };
+    } catch (e) { return null; }
+  }
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+
+  function resolveEtf(q) {
+    const s = String(q || "").trim().toUpperCase();
+    if (!s) return null;
+    return ETFS.find(e => e.wkn.toUpperCase() === s || e.isin.toUpperCase() === s) || null;
+  }
+  function sumById(rows) {
+    const out = {};
+    for (const r of rows) {
+      const e = resolveEtf(r.q);
+      if (e) out[e.id] = (out[e.id] || 0) + (Number(r.v) || 0);
+    }
+    return out;
+  }
+  function unknownRows(rows) {
+    return rows.filter(r => String(r.q || "").trim() && !resolveEtf(r.q)).length;
+  }
+
+  function donutSVG(items) {
+    const entries = items.filter(i => i.value > 0);
+    const total = entries.reduce((s, i) => s + i.value, 0);
+    if (!total) return `<p class="muted">Keine Beträge erfasst.</p>`;
+    const R = 52, C = 2 * Math.PI * R;
+    let off = 0;
+    const circles = entries.map(i => {
+      const len = i.value / total * C;
+      const el = `<circle r="${R}" cx="70" cy="70" fill="none" stroke="${i.color}" stroke-width="26" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;
+      off += len;
+      return el;
+    }).join("");
+    const legend = entries.map(i =>
+      `<div class="legend-item"><span class="dot" style="background:${i.color}"></span>${esc(i.label)} · ${i.pct != null ? fmtPct1(i.pct) : fmtPct(i.value / total * 100)}</div>`).join("");
+    return `<div style="text-align:center">
+      <svg width="140" height="140" viewBox="0 0 140 140">${circles}</svg>
+      <div class="legend" style="flex-direction:column;align-items:flex-start;gap:4px">${legend}</div>
+    </div>`;
+  }
+
+  // --- generischer Zeilen-Editor (Bestand + Kauf-Rechner) ---
+  const ICON_PLUS = `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+  const ICON_TRASH = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6.5 2h3M4 4l.8 10h6.4L12 4M6.5 7v4M9.5 7v4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
+
+  function rowHTML(r, i) {
+    const known = !String(r.q || "").trim() || !!resolveEtf(r.q);
+    const e = resolveEtf(r.q);
+    return `<div class="hold-row">
+      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="WKN oder ISIN" autocomplete="off">
+      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="Betrag in €">
+      <button class="icon-btn" data-act="add" data-idx="${i}" title="Übernehmen und neue Zeile anlegen">${ICON_PLUS}</button>
+      <button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="Eintrag löschen">${ICON_TRASH}</button>
+      <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
+    </div>`;
+  }
+
+  function createRowEditor(containerId, rows, onLive) {
+    const el = document.getElementById(containerId);
+    function render() {
+      if (!rows.length) rows.push({ q: "", v: "" });
+      el.innerHTML = rows.map(rowHTML).join("");
+    }
+    el.addEventListener("input", ev => {
+      const d = ev.target.dataset;
+      const row = rows[+d.idx];
+      if (!row) return;
+      if (d.field === "q") {
+        row.q = ev.target.value;
+        const e = resolveEtf(row.q);
+        const known = !String(row.q).trim() || !!e;
+        if (ev.target.classList) ev.target.classList.toggle("input-err", !known);
+        const nameEl = el.querySelector ? el.querySelector('.hold-name[data-idx="' + d.idx + '"]') : null;
+        if (nameEl) {
+          nameEl.textContent = e ? e.name : "";
+          if (e) nameEl.setAttribute("title", e.name); else nameEl.removeAttribute("title");
+        }
+      } else if (d.field === "v") {
+        row.v = Math.max(0, parseFloat(ev.target.value) || 0);
+      } else return;
+      save(); onLive();
+    });
+    el.addEventListener("click", ev => {
+      const btn = ev.target.closest ? ev.target.closest("[data-act]") : null;
+      if (!btn || !btn.dataset.act) return;
+      const idx = +btn.dataset.idx;
+      if (btn.dataset.act === "add") {
+        const e = resolveEtf(rows[idx] && rows[idx].q);
+        if (e) {
+          const dupIdx = rows.findIndex((r, j) => j !== idx && resolveEtf(r.q) && resolveEtf(r.q).id === e.id);
+          if (dupIdx !== -1) {
+            rows[dupIdx].v = (Number(rows[dupIdx].v) || 0) + (Number(rows[idx].v) || 0);
+            rows.splice(idx, 1);
+            const last = rows[rows.length - 1];
+            if (!last || String(last.q).trim()) rows.push({ q: "", v: "" });
+            save(); render(); onLive();
+            return;
+          }
+        }
+        rows.splice(idx + 1, 0, { q: "", v: "" });
+        save(); render();
+        const inputs = el.querySelectorAll(".hold-q");
+        if (inputs[idx + 1]) inputs[idx + 1].focus();
+      } else if (btn.dataset.act === "del") {
+        rows.splice(idx, 1);
+        save(); render(); onLive();
+      }
+    });
+    render();
+    return { render };
+  }
+
+  function sumLine(elId, label, byId, rows) {
+    const total = Object.values(byId).reduce((s, v) => s + v, 0);
+    const positions = Object.values(byId).filter(v => v > 0).length;
+    const unknown = unknownRows(rows);
+    document.getElementById(elId).innerHTML = `<span class="sum-label">${label} · ${positions} ${positions === 1 ? "Position" : "Positionen"}</span><span class="sum-value">${nfEur.format(total)}</span>`
+      + (unknown ? `<span class="muted sum-hint">(${unknown} ${unknown === 1 ? "Eintrag" : "Einträge"} ohne gültige WKN nicht gezählt)</span>` : "");
+  }
+
+  // --- Bestand ---
+  function updateHoldingsSum() {
+    sumLine("holdings-sum", "Depotwert", sumById(state.holdings), state.holdings);
+  }
+  function holdingsLive() { updateHoldingsSum(); updateProjection(); }
+
+  // --- Kauf-Rechner ---
+  function updateBuy() {
+    const byId = sumById(state.purchases);
+    const items = ETFS.map(e => ({ etf: e, value: byId[e.id] || 0 })).filter(i => i.value > 0);
+    const agg = ETFCalc.aggregate(items);
+    document.getElementById("buy-donut").innerHTML = donutSVG(
+      ETFCalc.FINE.map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, pct: agg.fine[f] || 0, color: BAR_COLORS[f] }))
+    );
+    document.getElementById("buy-fine").innerHTML = items.length
+      ? `<tr><th>Region</th>${items.map(i => `<th class="num">${esc(i.etf.shortName)}</th>`).join("")}<th class="num">Kauf</th></tr>` +
+        ETFCalc.FINE.map(f => `<tr><td>${ETFCalc.FINE_LABELS[f]}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
+      : `<tr><td class="muted">Noch keine Käufe eingegeben.</td></tr>`;
+    sumLine("buy-sum", "Kaufvolumen (monatlich)", byId, state.purchases);
+  }
+  function buyLive() { updateBuy(); updateProjection(); }
+
+  // --- Prognose ---
+  const FINE_SHORT = { nordamerika: "N-Am.", europa: "Europa", asien: "Asien", suedamerika: "S-Am.", afrika: "Afrika", australien: "Ozeanien" };
+
+  function renderProjRates() {
+    document.getElementById("proj-rates").innerHTML = ETFS.map(e => `
+      <div class="rate-row">
+        <span class="rate-name">${esc(e.shortName)}</span>
+        <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
+        <span class="rate-unit">%</span>
+        <span class="muted rate-ref">seit ${esc(e.inception.slice(0, 4))} real: ${fmtPct1(e.perf.sinceInceptionPa)} p.a.</span>
+      </div>`).join("");
+    ETFS.forEach(e => {
+      document.getElementById("rate-" + e.id).addEventListener("input", ev => {
+        state.rates[e.id] = Math.max(0, parseFloat(ev.target.value) || 0);
+        save(); updateProjection();
+      });
+    });
+  }
+
+  function updateProjection() {
+    const hById = sumById(state.holdings);
+    const pById = sumById(state.purchases);
+    const holdings = ETFS.map(e => hById[e.id] || 0);
+    const monthly = ETFS.map(e => pById[e.id] || 0);
+    const rates = ETFS.map(e => state.rates[e.id] || 0);
+    const hasInput = holdings.some(v => v > 0) || monthly.some(v => v > 0);
+    const table = document.getElementById("proj-table");
+    const note = document.getElementById("proj-note");
+    if (!hasInput) {
+      table.innerHTML = `<tr><td class="muted">Kein Bestand erfasst und keine monatlichen Käufe im Kauf-Rechner gesetzt.</td></tr>`;
+      note.textContent = "";
+      lastProj = null;
+      hideProjMap();
+      return;
+    }
+    const years = [0, 1, 2, 3, 5, 7, 10];
+    const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
+    const y0 = proj[0];
+    const startYear = new Date().getFullYear();
+    const colLabel = y => y === 0 ? `${startYear} (heute)` : String(startYear + y);
+    lastProj = proj;
+    projLabels = years.map(colLabel);
+    const head = `<tr><th>Kennzahl</th>${years.map((y, i) => `<th class="num" data-col="${i + 1}">${colLabel(y)}</th>`).join("")}</tr>`;
+    const rows = `<tr><td><strong>Depotwert</strong></td>${proj.map((p, i) => `<td class="num" data-col="${i + 1}"><strong>${nfEur.format(p.total)}</strong></td>`).join("")}</tr>`
+      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${proj.map((p, i) => `<td class="num" data-col="${i + 1}">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
+        table.innerHTML = head + rows;
+    syncProjMap();
+    const last = proj[proj.length - 1];
+    const drift = ETFCalc.FINE.map(f => ({ f, d: last.fine[f] - y0.fine[f] })).filter(x => Math.abs(x.d) >= 0.05)
+      .sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+    note.textContent = drift.length
+      ? `Regionsdrift bis ${startYear + years[years.length - 1]} insgesamt: ` + drift.map(x => `${ETFCalc.FINE_LABELS[x.f]} ${x.d >= 0 ? "+" : ""}${x.d.toFixed(1)} pp`).join(", ") + "."
+      : "Keine relevante Regionsdrift über den Zeitraum.";
+  }
+
+  // --- Prognose-Weltkarten-Overlay ---
+  function projColFrom(node) {
+    while (node && node.getAttribute) {
+      const c = node.getAttribute("data-col");
+      if (c != null) return +c;
+      node = node.parentNode;
+    }
+    return null;
+  }
+  function renderProjMap(col) {
+    const ov = document.getElementById("proj-map-overlay");
+    const p = lastProj && lastProj[col - 1];
+    if (!p) { hideProjMap(); return; }
+    ov.innerHTML = `<div class="proj-map-title">${esc(projLabels[col - 1])}</div>${worldMapSVG(p.fine)}`;
+    ov.hidden = false;
+    ov.setAttribute("aria-hidden", "false");
+    ov.classList.toggle("pinned", pinnedCol === col);
+    overlayCol = col;
+  }
+  function positionProjMap(col, evt) {
+    const ov = document.getElementById("proj-map-overlay");
+    const box = ov.parentElement;
+    const r = box && box.getBoundingClientRect ? box.getBoundingClientRect() : { left: 0, top: 0, width: 640, height: 320 };
+    const W = 196, H = 132, pad = 6;
+    let x, y;
+    if (evt && typeof evt.clientX === "number") {
+      x = evt.clientX - r.left + 14;
+      y = evt.clientY - r.top + 14;
+    } else {
+      x = (col / (lastProj.length + 1)) * r.width;
+      y = r.height - H - pad;
+    }
+    x = Math.max(pad, Math.min(x, r.width - W - pad));
+    y = Math.max(pad, Math.min(y, r.height - H - pad));
+    ov.style.left = Math.round(x) + "px";
+    ov.style.top = Math.round(y) + "px";
+  }
+  function hideProjMap() {
+    const ov = document.getElementById("proj-map-overlay");
+    ov.hidden = true;
+    ov.setAttribute("aria-hidden", "true");
+    overlayCol = null;
+  }
+  function syncProjMap() {
+    if (pinnedCol) renderProjMap(pinnedCol);
+    else if (overlayCol) renderProjMap(overlayCol);
+    else hideProjMap();
+  }
+
+  // --- Init ---
+  const projTable = document.getElementById("proj-table");
+  projTable.addEventListener("mouseover", ev => {
+    const col = projColFrom(ev.target);
+    if (col >= 1) { renderProjMap(col); positionProjMap(col, ev); }
+  });
+  projTable.addEventListener("mousemove", ev => {
+    const col = projColFrom(ev.target);
+    if (col >= 1 && col === overlayCol) positionProjMap(col, ev);
+  });
+  projTable.addEventListener("mouseleave", () => {
+    if (pinnedCol) renderProjMap(pinnedCol);
+    else hideProjMap();
+  });
+  projTable.addEventListener("click", ev => {
+    const col = projColFrom(ev.target);
+    if (col < 1) return;
+    if (pinnedCol === col) { pinnedCol = null; hideProjMap(); }
+    else { pinnedCol = col; renderProjMap(col); }
+  });
+
+  function exportPayload() {
+    return {
+      app: "etfplaner", version: 1, exportedAt: new Date().toISOString(),
+      holdings: toRowArray(state.holdings), purchases: toRowArray(state.purchases)
+    };
+  }
+  function exportData() {
+    const blob = new Blob([JSON.stringify(exportPayload(), null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `etf-planer-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+  function importData(obj) {
+    if (!obj || typeof obj !== "object" || (!Array.isArray(obj.holdings) && !Array.isArray(obj.purchases))) {
+      alert("Import fehlgeschlagen: Die Datei enthaelt kein gueltiges ETF-Planer-Format (holdings / purchases).");
+      return;
+    }
+    const h = normalizeRows(obj.holdings || []), p = normalizeRows(obj.purchases || []);
+    const unknown = h.concat(p).filter(r => r.q && !resolveEtf(r.q)).length;
+    const msg = `Import: ${toRowArray(h).length} Bestands- und ${toRowArray(p).length} Kauf-Zeilen laden?`
+      + (unknown ? ` ACHTUNG: ${unknown} ${unknown === 1 ? "unbekannte WKN wird" : "unbekannte WKNs werden"} uebernommen, aber nicht gezaehlt.` : "");
+    if (!confirm(msg)) return;
+    state.holdings.length = 0; state.holdings.push(...h);
+    state.purchases.length = 0; state.purchases.push(...p);
+    save();
+    holdEditor.render(); buyEditor.render();
+    updateHoldingsSum(); buyLive();
+  }
+  document.getElementById("btn-export").addEventListener("click", exportData);
+  const importInput = document.getElementById("import-file");
+  document.getElementById("btn-import").addEventListener("click", () => importInput.click());
+  importInput.addEventListener("change", () => {
+    const f = importInput.files && importInput.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => { try { importData(JSON.parse(String(reader.result))); } catch (e) { alert("Import fehlgeschlagen: Datei konnte nicht gelesen werden."); } importInput.value = ""; };
+    reader.onerror = () => { alert("Import fehlgeschlagen: Datei konnte nicht gelesen werden."); importInput.value = ""; };
+    reader.readAsText(f);
+  });
+
+  document.getElementById("data-source").textContent = `Daten: ${ETF_DATA.source} · Stand: ${ETF_DATA.asOf} · Alle Renditen in EUR (XETRA)`;
+  document.getElementById("disclaimer").textContent = "Keine Anlageberatung. Statische Daten — Performance der Vergangenheit schlägt sich nicht immer in der Zukunft nieder. Eingaben werden nur lokal im Browser gespeichert.";
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    if (!confirm("Alle lokalen Eingaben (Käufe, Bestand, Rendite-Annahmen) löschen?")) return;
+    localStorage.removeItem(LS_KEY);
+    location.reload();
+  });
+
+  const buyEditor = createRowEditor("buy-rows", state.purchases, buyLive);
+  const holdEditor = createRowEditor("holdings-rows", state.holdings, holdingsLive);
+  updateBuy();
+  updateHoldingsSum();
+  renderProjRates();
+  updateProjection();
+})();

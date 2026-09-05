@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF-Planer · Planung</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>ETF-Planer</h1>
+    <p class="subtitle" id="data-source"></p>
+  </div>
+  <div class="header-right">
+    <button id="btn-export" class="btn-ghost" title="Bestand und Kauf-Rechner als JSON-Datei speichern">Export</button>
+    <button id="btn-import" class="btn-ghost" title="Bestand und Kauf-Rechner aus einer JSON-Datei laden">Import</button>
+    <button id="btn-reset" class="btn-ghost" title="Alle Eingaben löschen">Zurücksetzen</button>
+  </div>
+</header>
+<input type="file" id="import-file" accept=".json,application/json" hidden>
+
+<main>
+  <section id="holdings">
+    <h2>1 · Bestand</h2>
+    <div class="card">
+      <p class="muted">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</p>
+      <div id="holdings-rows"></div>
+      <div id="holdings-sum" class="holdings-sum"></div>
+    </div>
+  </section>
+
+  <section id="buy">
+    <h2>2 · Kauf-Rechner</h2>
+    <div class="card">
+      <p class="muted">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</p>
+      <div id="buy-rows"></div>
+      <div id="buy-sum" class="holdings-sum"></div>
+      <h3>Ergebnis des Kaufs</h3>
+      <div class="buy-result">
+        <div id="buy-donut" class="donut-box"></div>
+        <div class="table-wrap"><table id="buy-fine"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projection">
+    <h2>3 · Prognose Gesamtportfolio</h2>
+    <div class="card">
+      <p class="muted">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Kauf-Rechner (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</p>
+      <div id="proj-rates" class="rate-grid"></div>
+      <p class="proj-maps-hint">Fahre mit der Maus über eine Jahr-Spalte (oder klicke sie an, um die Karte anzuheften), um die Weltkarte dieser Spalte zu sehen.</p>
+      <div class="proj-table-box">
+        <div class="table-wrap"><table id="proj-table"></table></div>
+        <div id="proj-map-overlay" class="proj-map-overlay" aria-hidden="true" hidden></div>
+      </div>
+      <p id="proj-note" class="muted"></p>
+      <h3>Empfohlene Zielverteilung</h3>
+      <div class="target-info">
+        <p class="target-vals">Amerika <strong>65 %</strong> · Europa <strong>15 %</strong> · Asien <strong>16 %</strong> · Rest der Welt <strong>4 %</strong></p>
+        <p class="muted">Das entspricht der globalen Marktkapitalisierung (FTSE All-World / MSCI ACWI) — der einzigen Gewichtung, die sich automatisch selbst korrigiert: Verliert eine Region an Bedeutung, sinkt ihr Gewicht, ohne dass du verkaufen musst. Es gibt keine belastbaren Belege, dass regionale Übergewichte langfristig Rendite bringen; historisch kostete ein Europa-Übergewicht (~15 % vs. Markt) vor allem Rendite, während Asien (~16 %) in einem reinen Industrieländer-Depot systematisch untergewichtet wäre. 4 % Südamerika/Afrika/Ozeanien entsprechen dem Marktanteil. Abweichungen davon sind eine bewusste Wette — die Prognose oben zeigt, wie sich deine Verteilung ohne Verkäufe über die Jahre Richtung Ziel bewegt.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p id="disclaimer" class="muted"></p>
+</footer>
+
+<script src="data.js"></script>
+<script src="calc.js"></script>
+<script src="shared.js"></script>
+<script src="planen.js"></script>
+</body>
+</html>
