@@ -125,7 +125,6 @@ tr:last-child td { border-bottom: none; }
 .etf-map .legend { margin-top: 8px; }
 
 .worldmap { display: block; width: 100%; height: auto; margin: 6px 0 10px; background: #eef4fa; border-radius: 6px; padding: 4px; }
-.proj-maps-hint { font-size: 13px; color: var(--muted); margin: 4px 0 8px; }
 #proj-table th[data-col], #proj-table td[data-col] { cursor: pointer; }
 #proj-table td[data-col]:hover { background: #eef4fa; }
 .proj-table-box { position: relative; }
