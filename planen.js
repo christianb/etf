@@ -377,6 +377,11 @@
   });
   applyUI();
 
+  document.addEventListener("wheel", ev => {
+    const t = ev.target;
+    if (t && t.type === "number") t.blur();
+  }, { passive: true });
+
   const buyEditor = createRowEditor("buy-rows", state.purchases, buyLive);
   const holdEditor = createRowEditor("holdings-rows", state.holdings, holdingsLive);
   updateBuy();
