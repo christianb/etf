@@ -125,6 +125,50 @@ h3 {
 .muted a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
 .muted a:hover { border-bottom-style: solid; }
 
+.hint { position: relative; width: fit-content; margin: 0 0 12px auto; }
+.hint-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.hint-btn:hover, .hint:hover .hint-btn, .hint:focus-within .hint-btn { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.hint-btn::after { content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: 7px; }
+.hint-text {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 6px);
+  z-index: 30;
+  padding: 4px 10px;
+  background: var(--card);
+  border: 1px solid var(--strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+  white-space: normal;
+  width: max-content;
+  max-width: min(460px, calc(100vw - 90px));
+  line-height: 1.45;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s, visibility 0.12s;
+}
+.hint:hover .hint-text, .hint:focus-within .hint-text { opacity: 1; visibility: visible; pointer-events: auto; }
+
 .btn {
   background: var(--accent);
   color: #fff;

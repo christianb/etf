@@ -30,7 +30,7 @@
   <section id="holdings">
     <h2>1 · Bestand</h2>
     <div class="card">
-      <p class="muted">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</p>
+      <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</span></div>
       <div id="holdings-rows"></div>
       <div id="holdings-sum" class="holdings-sum"></div>
     </div>
@@ -39,7 +39,7 @@
   <section id="buy">
     <h2>2 · Kauf-Rechner</h2>
     <div class="card">
-      <p class="muted">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</p>
+      <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</span></div>
       <div id="buy-rows"></div>
       <div id="buy-sum" class="holdings-sum"></div>
       <h3>Ergebnis des Kaufs</h3>
@@ -53,7 +53,7 @@
   <section id="projection">
     <h2>3 · Prognose Gesamtportfolio</h2>
     <div class="card">
-      <p class="muted">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Kauf-Rechner (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</p>
+      <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Kauf-Rechner (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</span></div>
       <div id="proj-rates" class="rate-grid"></div>
       <div class="proj-table-box">
         <div class="table-wrap"><table id="proj-table"></table></div>
