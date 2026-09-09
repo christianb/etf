@@ -206,17 +206,14 @@
     const rates = ETFS.map(e => state.rates[e.id] || 0);
     const hasInput = holdings.some(v => v > 0) || monthly.some(v => v > 0);
     const table = document.getElementById("proj-table");
-    const note = document.getElementById("proj-note");
     if (!hasInput) {
       table.innerHTML = `<tr><td class="muted">Kein Bestand erfasst und keine monatlichen Käufe im Kauf-Rechner gesetzt.</td></tr>`;
-      note.textContent = "";
       lastProj = null;
       hideProjMap();
       return;
     }
     const years = [0, 1, 2, 3, 5, 7, 10];
     const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
-    const y0 = proj[0];
     const startYear = new Date().getFullYear();
     const colLabel = y => y === 0 ? `${startYear} (heute)` : String(startYear + y);
     lastProj = proj;
@@ -226,12 +223,6 @@
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${proj.map((p, i) => `<td class="num" data-col="${i + 1}">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
         table.innerHTML = head + rows;
     syncProjMap();
-    const last = proj[proj.length - 1];
-    const drift = ETFCalc.FINE.map(f => ({ f, d: last.fine[f] - y0.fine[f] })).filter(x => Math.abs(x.d) >= 0.05)
-      .sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
-    note.textContent = drift.length
-      ? `Regionsdrift bis ${startYear + years[years.length - 1]} insgesamt: ` + drift.map(x => `${ETFCalc.FINE_LABELS[x.f]} ${x.d >= 0 ? "+" : ""}${x.d.toFixed(1)} pp`).join(", ") + "."
-      : "Keine relevante Regionsdrift über den Zeitraum.";
   }
 
   // --- Prognose-Weltkarten-Overlay ---
