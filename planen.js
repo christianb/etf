@@ -5,8 +5,10 @@
   const state = load() || {
     purchases: [],
     holdings: [],
-    rates: Object.assign({}, DEFAULT_RATES)
+    rates: Object.assign({}, DEFAULT_RATES),
+    ui: { mode: null }
   };
+  if (!state.ui) state.ui = { mode: null };
   let overlayCol = null;
   let pinnedCol = null;
   let lastProj = null;
@@ -32,7 +34,8 @@
       return {
         purchases: normalizeRows(s.purchases),
         holdings: normalizeRows(s.holdings),
-        rates: Object.assign({}, DEFAULT_RATES, s.rates)
+        rates: Object.assign({}, DEFAULT_RATES, s.rates),
+        ui: s.ui && typeof s.ui === "object" && (s.ui.mode === "dark" || s.ui.mode === "light") ? { mode: s.ui.mode } : null
       };
     } catch (e) { return null; }
   }
@@ -351,6 +354,28 @@
     localStorage.removeItem(LS_KEY);
     location.reload();
   });
+
+  // --- Design: Hell/Dunkel ---
+  function preferredMode() {
+    if (state.ui.mode) return state.ui.mode;
+    try {
+      if (typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+    } catch (e) {}
+    return "light";
+  }
+  function applyUI() {
+    const mode = preferredMode();
+    const root = document.documentElement;
+    if (root && root.setAttribute) root.setAttribute("data-mode", mode);
+    const sun = document.getElementById("ico-sun"), moon = document.getElementById("ico-moon");
+    if (sun) sun.hidden = mode !== "dark";
+    if (moon) moon.hidden = mode === "dark";
+  }
+  document.getElementById("btn-mode").addEventListener("click", () => {
+    state.ui.mode = preferredMode() === "dark" ? "light" : "dark";
+    save(); applyUI();
+  });
+  applyUI();
 
   const buyEditor = createRowEditor("buy-rows", state.purchases, buyLive);
   const holdEditor = createRowEditor("holdings-rows", state.holdings, holdingsLive);
