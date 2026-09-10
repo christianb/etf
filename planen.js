@@ -73,7 +73,8 @@
     const e = resolveEtf(r.q);
     return `<div class="hold-row">
       <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="WKN oder ISIN" autocomplete="off">
-      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="Betrag in €">
+      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="Betrag">
+      <span class="hold-currency">€</span>
       <button class="icon-btn" data-act="add" data-idx="${i}" title="Übernehmen und neue Zeile anlegen">${ICON_PLUS}</button>
       <button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="Eintrag löschen">${ICON_TRASH}</button>
       <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
