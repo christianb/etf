@@ -275,7 +275,6 @@ def serialize(data):
     etfs = data["etfs"]
     lines = []
     lines.append("const ETF_DATA = {")
-    lines.append('  source: "Finanzfluss / justETF (XETRA, EUR-Renditen)",')
     lines.append('  asOf: "' + js_str(data["asOf"]) + '",')
     lines.append("  etfs: [")
     for i, e in enumerate(etfs):

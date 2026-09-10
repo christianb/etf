@@ -1,5 +1,4 @@
 const ETF_DATA = {
-  source: "Finanzfluss / justETF (XETRA, EUR-Renditen)",
   asOf: "2026-09-08",
   etfs: [
     {

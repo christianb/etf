@@ -270,7 +270,7 @@
     reader.readAsText(f);
   });
 
-  document.getElementById("data-source").textContent = `Daten: ${ETF_DATA.source} · Stand: ${ETF_DATA.asOf} · Alle Renditen in EUR (XETRA)`;
+  document.getElementById("data-source").textContent = `Stand: ${ETF_DATA.asOf} · Alle Renditen in EUR (XETRA)`;
   document.getElementById("disclaimer").textContent = "Keine Anlageberatung. Statische Daten — Performance der Vergangenheit schlägt sich nicht immer in der Zukunft nieder. Eingaben werden nur lokal im Browser gespeichert.";
   document.getElementById("btn-reset").addEventListener("click", () => {
     if (!confirm("Alle lokalen Eingaben (Käufe, Bestand, Rendite-Annahmen) löschen?")) return;
