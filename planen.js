@@ -68,15 +68,16 @@
   const ICON_PLUS = `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
   const ICON_TRASH = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6.5 2h3M4 4l.8 10h6.4L12 4M6.5 7v4M9.5 7v4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
 
-  function rowHTML(r, i) {
+  function rowHTML(r, i, isLast) {
     const known = !String(r.q || "").trim() || !!resolveEtf(r.q);
     const e = resolveEtf(r.q);
     return `<div class="hold-row">
       <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="WKN oder ISIN" autocomplete="off">
       <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="Betrag">
       <span class="hold-currency">€</span>
-      <button class="icon-btn" data-act="add" data-idx="${i}" title="Übernehmen und neue Zeile anlegen">${ICON_PLUS}</button>
-      <button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="Eintrag löschen">${ICON_TRASH}</button>
+      ${isLast
+        ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="Übernehmen und neue Zeile anlegen">${ICON_PLUS}</button>`
+        : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="Eintrag löschen">${ICON_TRASH}</button>`}
       <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
     </div>`;
   }
@@ -85,7 +86,7 @@
     const el = document.getElementById(containerId);
     function render() {
       if (!rows.length) rows.push({ q: "", v: "" });
-      el.innerHTML = rows.map(rowHTML).join("");
+      el.innerHTML = rows.map((r, i) => rowHTML(r, i, i === rows.length - 1)).join("");
     }
     el.addEventListener("input", ev => {
       const d = ev.target.dataset;
