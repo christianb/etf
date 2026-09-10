@@ -224,6 +224,7 @@ table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
 th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+#buy-fine td.num, #buy-fine th.num { text-align: center; }
 tbody tr, table > tr { transition: background 0.12s; }
 td.pos, span.pos { color: var(--green); }
 td.neg, span.neg { color: var(--red); }
