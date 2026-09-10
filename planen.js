@@ -181,7 +181,9 @@
   function renderProjRates() {
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
-    const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0);
+    const GROUP_ORDER = { world: 0, europa: 1, em: 2 };
+    const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0)
+      .sort((a, b) => GROUP_ORDER[a.group] - GROUP_ORDER[b.group]);
     const el = document.getElementById("proj-rates");
     if (!list.length) {
       el.innerHTML = `<span class="muted">${esc(t("proj.emptyRates"))}</span>`;
