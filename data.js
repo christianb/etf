@@ -1,6 +1,6 @@
 const ETF_DATA = {
   source: "Finanzfluss / justETF (XETRA, EUR-Renditen)",
-  asOf: "2026-09-06",
+  asOf: "2026-09-08",
   etfs: [
     {
       id: "world",
@@ -116,6 +116,29 @@ const ETF_DATA = {
       maxDd1y: -10.12,
       regions: { nordamerika: 0.33, europa: 98.02, asien: 0, australien: 0, suedamerika: 0, afrika: 0 },
       link: "https://www.finanzfluss.de/informer/etf/ie00b52vj196/"
+    },
+    {
+      id: "esg-global-all-cap",
+      color: "#a3e635",
+      defaultRate: 8.0,
+      name: "Vanguard ESG Global All Cap UCITS ETF",
+      shortName: "ESG Global All Cap",
+      isin: "IE00BNG8L278",
+      wkn: "A2QL8U",
+      ticker: "V3AA",
+      ter: 0.24,
+      fundCurrency: "USD",
+      tradingCurrency: "EUR",
+      replication: "physisch",
+      distribution: "thesaurierend",
+      inception: "2021-03-23",
+      volume: 1.60,
+      marketType: "dm",
+      perf: { y1: 21.03, y3: 20.86, y5: 9.74, sinceInceptionTotal: 78.46, sinceInceptionPa: 12.28 },
+      vol1y: 12.57,
+      maxDd1y: -8.16,
+      regions: { nordamerika: 66.14, europa: 12.40, asien: 18.94, australien: 1.50, suedamerika: 0.59, afrika: 0.36 },
+      link: "https://www.finanzfluss.de/informer/etf/ie00bng8l278/"
     }
   ]
 };
