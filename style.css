@@ -370,7 +370,7 @@ footer { padding: 16px 24px 36px; max-width: 1060px; margin: 0 auto; }
 .rate-chip:hover::after, .rate-chip:focus-within::after { opacity: 1; visibility: visible; }
 .rate-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
 .rate-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
-.rate-chip .rate-v { width: 62px; box-sizing: border-box; height: 28px; padding: 2px 6px; text-align: right; }
+.rate-chip .rate-v { width: 52px; box-sizing: border-box; height: 28px; padding: 2px 6px; text-align: center; }
 .rate-unit { color: var(--muted); font-size: 13px; }
 .dot-region { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
 
