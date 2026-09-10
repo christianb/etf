@@ -298,7 +298,8 @@
   function exportPayload() {
     return {
       app: "etfplaner", version: 1, exportedAt: new Date().toISOString(),
-      holdings: toRowArray(state.holdings), purchases: toRowArray(state.purchases)
+      holdings: toRowArray(state.holdings), purchases: toRowArray(state.purchases),
+      ui: { mode: preferredMode() }
     };
   }
   function exportData() {
@@ -322,9 +323,13 @@
     if (!confirm(msg)) return;
     state.holdings.length = 0; state.holdings.push(...h);
     state.purchases.length = 0; state.purchases.push(...p);
+    if (obj.ui && typeof obj.ui === "object" && (obj.ui.mode === "dark" || obj.ui.mode === "light")) {
+      state.ui.mode = obj.ui.mode;
+    }
     save();
     holdEditor.render(); buyEditor.render();
     updateHoldingsSum(); buyLive();
+    applyUI();
   }
   document.getElementById("btn-export").addEventListener("click", exportData);
   const importInput = document.getElementById("import-file");
