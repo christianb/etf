@@ -161,7 +161,7 @@
   function updateHoldingsSum() {
     sumLine("holdings-sum", "Depotwert", sumById(state.holdings), state.holdings);
   }
-  function holdingsLive() { updateHoldingsSum(); updateProjection(); }
+  function holdingsLive() { updateHoldingsSum(); renderProjRates(); updateProjection(); }
 
   // --- Kauf-Rechner ---
   function updateBuy() {
@@ -177,20 +177,28 @@
       : `<tr><td class="muted">Noch keine Käufe eingegeben.</td></tr>`;
     sumLine("buy-sum", "Kaufvolumen (monatlich)", byId, state.purchases);
   }
-  function buyLive() { updateBuy(); updateProjection(); }
+  function buyLive() { updateBuy(); renderProjRates(); updateProjection(); }
 
   // --- Prognose ---
   const FINE_SHORT = { nordamerika: "N-Am.", europa: "Europa", asien: "Asien", suedamerika: "S-Am.", afrika: "Afrika", australien: "Ozeanien" };
 
   function renderProjRates() {
-    document.getElementById("proj-rates").innerHTML = ETFS.map(e => `
+    const hById = sumById(state.holdings);
+    const pById = sumById(state.purchases);
+    const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0);
+    const el = document.getElementById("proj-rates");
+    if (!list.length) {
+      el.innerHTML = `<span class="muted">Noch keine ETFs in Depot oder Sparplan erfasst.</span>`;
+      return;
+    }
+    el.innerHTML = list.map(e => `
       <label class="rate-chip" data-tip="Rendite seit ${esc(e.inception.slice(0, 4))}: ${fmtPct1(e.perf.sinceInceptionPa)} p.a. (real)">
         <span class="rate-dot" style="background:${ETF_COLORS[e.id]}"></span>
         <span class="rate-name">${esc(e.shortName)}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
         <span class="rate-unit">%</span>
       </label>`).join("");
-    ETFS.forEach(e => {
+    list.forEach(e => {
       document.getElementById("rate-" + e.id).addEventListener("input", ev => {
         state.rates[e.id] = Math.max(0, parseFloat(ev.target.value) || 0);
         save(); updateProjection();
