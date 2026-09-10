@@ -158,8 +158,24 @@
   }
 
   // --- Bestand ---
+  function updateHoldingsFine() {
+    const el = document.getElementById("holdings-fine");
+    if (!el) return;
+    const byId = sumById(state.holdings);
+    const items = ETFS.map(e => ({ etf: e, value: byId[e.id] || 0 })).filter(i => i.value > 0);
+    if (!items.length) { el.innerHTML = ""; return; }
+    const agg = ETFCalc.aggregate(items);
+    const entries = ETFCalc.FINE
+      .map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
+      .filter(x => x.value > 0.04);
+    const sum = entries.reduce((s, x) => s + x.value, 0) || 1;
+    const bar = entries.map(x => `<div class="region-seg" style="width:${(x.value / sum * 100).toFixed(3)}%;background:${x.color}" title="${esc(x.label)}: ${fmtPct1(x.value)}"></div>`).join("");
+    const legend = entries.map(x => `<div class="legend-item"><span class="dot" style="background:${x.color}"></span>${esc(x.label)} · ${fmtPct1(x.value)}</div>`).join("");
+    el.innerHTML = `<div class="region-bar">${bar}</div><div class="legend region-legend">${legend}</div>`;
+  }
   function updateHoldingsSum() {
     sumLine("holdings-sum", "Depotwert", sumById(state.holdings), state.holdings);
+    updateHoldingsFine();
   }
   function holdingsLive() { updateHoldingsSum(); renderProjRates(); updateProjection(); }
 
