@@ -58,24 +58,14 @@
     return rows.filter(r => String(r.q || "").trim() && !resolveEtf(r.q)).length;
   }
 
-  function donutSVG(items) {
-    const entries = items.filter(i => i.value > 0);
-    const total = entries.reduce((s, i) => s + i.value, 0);
-    if (!total) return `<p class="muted">Keine Beträge erfasst.</p>`;
-    const R = 52, C = 2 * Math.PI * R;
-    let off = 0;
-    const circles = entries.map(i => {
-      const len = i.value / total * C;
-      const el = `<circle r="${R}" cx="70" cy="70" fill="none" stroke="${i.color}" stroke-width="26" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;
-      off += len;
-      return el;
-    }).join("");
-    const legend = entries.map(i =>
-      `<div class="legend-item"><span class="dot" style="background:${i.color}"></span>${esc(i.label)} · ${i.pct != null ? fmtPct1(i.pct) : fmtPct(i.value / total * 100)}</div>`).join("");
-    return `<div style="text-align:center">
-      <svg width="140" height="140" viewBox="0 0 140 140">${circles}</svg>
-      <div class="legend" style="flex-direction:column;align-items:flex-start;gap:4px">${legend}</div>
-    </div>`;
+  function regionBarHTML(agg) {
+    const entries = ETFCalc.FINE
+      .map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
+      .filter(x => x.value > 0.04);
+    const sum = entries.reduce((s, x) => s + x.value, 0) || 1;
+    const bar = entries.map(x => `<div class="region-seg" style="width:${(x.value / sum * 100).toFixed(3)}%;background:${x.color}" title="${esc(x.label)}: ${fmtPct1(x.value)}"></div>`).join("");
+    const legend = entries.map(x => `<div class="legend-item"><span class="dot" style="background:${x.color}"></span>${esc(x.label)} · ${fmtPct1(x.value)}</div>`).join("");
+    return `<div class="region-bar">${bar}</div><div class="legend region-legend">${legend}</div>`;
   }
 
   // --- generischer Zeilen-Editor (Bestand + Kauf-Rechner) ---
@@ -164,14 +154,7 @@
     const byId = sumById(state.holdings);
     const items = ETFS.map(e => ({ etf: e, value: byId[e.id] || 0 })).filter(i => i.value > 0);
     if (!items.length) { el.innerHTML = ""; return; }
-    const agg = ETFCalc.aggregate(items);
-    const entries = ETFCalc.FINE
-      .map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
-      .filter(x => x.value > 0.04);
-    const sum = entries.reduce((s, x) => s + x.value, 0) || 1;
-    const bar = entries.map(x => `<div class="region-seg" style="width:${(x.value / sum * 100).toFixed(3)}%;background:${x.color}" title="${esc(x.label)}: ${fmtPct1(x.value)}"></div>`).join("");
-    const legend = entries.map(x => `<div class="legend-item"><span class="dot" style="background:${x.color}"></span>${esc(x.label)} · ${fmtPct1(x.value)}</div>`).join("");
-    el.innerHTML = `<div class="region-bar">${bar}</div><div class="legend region-legend">${legend}</div>`;
+    el.innerHTML = regionBarHTML(ETFCalc.aggregate(items));
   }
   function updateHoldingsSum() {
     sumLine("holdings-sum", "Depotwert", sumById(state.holdings), state.holdings);
@@ -184,9 +167,7 @@
     const byId = sumById(state.purchases);
     const items = ETFS.map(e => ({ etf: e, value: byId[e.id] || 0 })).filter(i => i.value > 0);
     const agg = ETFCalc.aggregate(items);
-    document.getElementById("buy-donut").innerHTML = donutSVG(
-      ETFCalc.FINE.map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, pct: agg.fine[f] || 0, color: BAR_COLORS[f] }))
-    );
+    document.getElementById("buy-fine-bar").innerHTML = items.length ? regionBarHTML(agg) : "";
     document.getElementById("buy-fine").innerHTML = items.length
       ? `<tr><th>Region</th>${items.map(i => `<th class="num">${esc(i.etf.shortName)}</th>`).join("")}<th class="num">Kauf</th></tr>` +
         ETFCalc.FINE.map(f => `<tr><td>${ETFCalc.FINE_LABELS[f]}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
