@@ -105,7 +105,7 @@ h2 {
   align-items: center;
   gap: 10px;
 }
-h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+h2::after { content: ""; flex: 1; order: 1; height: 1px; background: var(--border); }
 h3 {
   font-size: 15px;
   font-weight: 700;
@@ -125,7 +125,7 @@ h3 {
 .muted a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
 .muted a:hover { border-bottom-style: solid; }
 
-.hint { position: relative; width: fit-content; margin: 0 0 12px auto; }
+.hint { position: relative; width: fit-content; order: 2; margin: 0; }
 .hint-btn {
   position: relative;
   display: inline-flex;
