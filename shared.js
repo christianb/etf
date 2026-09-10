@@ -3,7 +3,10 @@ const ETFS = ETF_DATA.etfs;
 const BAR_COLORS = { nordamerika: "#eab308", europa: "#3b82f6", asien: "#22c55e", suedamerika: "#ef4444", afrika: "#92400e", australien: "#a855f7" };
 const ETF_COLORS = Object.fromEntries(ETFS.map(e => [e.id, e.color]));
 
-function fmtEuro(v) { return new Intl.NumberFormat(I18N.numLocale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v); }
+function fmtEuro(v) {
+  const n = new Intl.NumberFormat(I18N.numLocale, { maximumFractionDigits: 0 }).format(Math.round(v));
+  return I18N.current === "en" ? `€\u00a0${n}` : `${n}\u00a0€`;
+}
 const fmtPct = v => v == null ? "—" : (Number(v) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
 const fmtPct1 = v => ((Number(v) || 0) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
 const fmtPerf = v => v == null ? '<span class="muted">—</span>' : `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : ""}${v.toLocaleString(I18N.numLocale, { maximumFractionDigits: 2 })} %</span>`;

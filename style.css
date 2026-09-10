@@ -196,6 +196,7 @@ h3 {
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--strong); background: var(--accent-soft); }
+#btn-reset { min-width: 116px; }
 
 .lang-toggle {
   display: inline-flex;
