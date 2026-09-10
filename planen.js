@@ -184,12 +184,12 @@
 
   function renderProjRates() {
     document.getElementById("proj-rates").innerHTML = ETFS.map(e => `
-      <div class="rate-row">
+      <label class="rate-chip" data-tip="Rendite seit ${esc(e.inception.slice(0, 4))}: ${fmtPct1(e.perf.sinceInceptionPa)} p.a. (real)">
+        <span class="rate-dot" style="background:${ETF_COLORS[e.id]}"></span>
         <span class="rate-name">${esc(e.shortName)}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
         <span class="rate-unit">%</span>
-        <span class="muted rate-ref">seit ${esc(e.inception.slice(0, 4))} real: ${fmtPct1(e.perf.sinceInceptionPa)} p.a.</span>
-      </div>`).join("");
+      </label>`).join("");
     ETFS.forEach(e => {
       document.getElementById("rate-" + e.id).addEventListener("input", ev => {
         state.rates[e.id] = Math.max(0, parseFloat(ev.target.value) || 0);
