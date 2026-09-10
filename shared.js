@@ -1,6 +1,6 @@
 const ETFS = ETF_DATA.etfs;
 
-const BAR_COLORS = { nordamerika: "#3b82f6", europa: "#f59e0b", asien: "#ef4444", suedamerika: "#6366f1", afrika: "#94a3b8", australien: "#14b8a6" };
+const BAR_COLORS = { nordamerika: "#eab308", europa: "#3b82f6", asien: "#22c55e", suedamerika: "#ef4444", afrika: "#92400e", australien: "#a855f7" };
 const ETF_COLORS = Object.fromEntries(ETFS.map(e => [e.id, e.color]));
 
 const nfEur = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
