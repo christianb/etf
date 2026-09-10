@@ -168,7 +168,7 @@
     document.getElementById("buy-fine-bar").innerHTML = items.length ? regionBarHTML(agg) : "";
     document.getElementById("buy-fine").innerHTML = items.length
       ? `<tr><th>Region</th>${items.map(i => `<th class="num">${esc(i.etf.shortName)}</th>`).join("")}<th class="num">Kauf</th></tr>` +
-        ETFCalc.FINE.map(f => `<tr><td>${ETFCalc.FINE_LABELS[f]}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
+        ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
       : `<tr><td class="muted">Noch keine Käufe eingegeben.</td></tr>`;
     sumLine("buy-sum", "Kaufvolumen (monatlich)", byId, state.purchases);
   }
