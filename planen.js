@@ -9,10 +9,6 @@
     ui: { mode: null }
   };
   if (!state.ui) state.ui = { mode: null };
-  let overlayCol = null;
-  let pinnedCol = null;
-  let lastProj = null;
-  let projLabels = [];
 
   function normalizeRows(r) {
     if (Array.isArray(r)) return r.filter(x => x && typeof x === "object").map(x => ({ q: String(x.q || ""), v: Math.max(0, Number(x.v) || 0) }));
@@ -213,93 +209,19 @@
     const table = document.getElementById("proj-table");
     if (!hasInput) {
       table.innerHTML = `<tr><td class="muted">Kein Bestand erfasst und keine monatlichen Käufe im Kauf-Rechner gesetzt.</td></tr>`;
-      lastProj = null;
-      hideProjMap();
       return;
     }
     const years = [0, 1, 2, 3, 5, 7, 10];
     const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
     const startYear = new Date().getFullYear();
     const colLabel = y => y === 0 ? `${startYear} (heute)` : String(startYear + y);
-    lastProj = proj;
-    projLabels = years.map(colLabel);
-    const head = `<tr><th>Kennzahl</th>${years.map((y, i) => `<th class="num" data-col="${i + 1}">${colLabel(y)}</th>`).join("")}</tr>`;
-    const rows = `<tr><td><strong>Depotwert</strong></td>${proj.map((p, i) => `<td class="num" data-col="${i + 1}"><strong>${nfEur.format(p.total)}</strong></td>`).join("")}</tr>`
-      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${proj.map((p, i) => `<td class="num" data-col="${i + 1}">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
+    const head = `<tr><th>Kennzahl</th>${years.map((y, i) => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
+    const rows = `<tr><td><strong>Depotwert</strong></td>${proj.map(p => `<td class="num"><strong>${nfEur.format(p.total)}</strong></td>`).join("")}</tr>`
+      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${proj.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
         table.innerHTML = head + rows;
-    syncProjMap();
-  }
-
-  // --- Prognose-Weltkarten-Overlay ---
-  function projColFrom(node) {
-    while (node && node.getAttribute) {
-      const c = node.getAttribute("data-col");
-      if (c != null) return +c;
-      node = node.parentNode;
-    }
-    return null;
-  }
-  function renderProjMap(col) {
-    const ov = document.getElementById("proj-map-overlay");
-    const p = lastProj && lastProj[col - 1];
-    if (!p) { hideProjMap(); return; }
-    ov.innerHTML = `<div class="proj-map-title">${esc(projLabels[col - 1])}</div>${worldMapSVG(p.fine)}`;
-    ov.hidden = false;
-    ov.setAttribute("aria-hidden", "false");
-    ov.classList.toggle("pinned", pinnedCol === col);
-    overlayCol = col;
-  }
-  function positionProjMap(col, evt) {
-    const ov = document.getElementById("proj-map-overlay");
-    const box = ov.parentElement;
-    const r = box && box.getBoundingClientRect ? box.getBoundingClientRect() : { left: 0, top: 0, width: 640, height: 320 };
-    const W = 196, H = 132, pad = 6;
-    let x, y;
-    if (evt && typeof evt.clientX === "number") {
-      x = evt.clientX - r.left + 14;
-      y = evt.clientY - r.top + 14;
-    } else {
-      x = (col / (lastProj.length + 1)) * r.width;
-      y = r.height - H - pad;
-    }
-    x = Math.max(pad, Math.min(x, r.width - W - pad));
-    y = Math.max(pad, Math.min(y, r.height - H - pad));
-    ov.style.left = Math.round(x) + "px";
-    ov.style.top = Math.round(y) + "px";
-  }
-  function hideProjMap() {
-    const ov = document.getElementById("proj-map-overlay");
-    ov.hidden = true;
-    ov.setAttribute("aria-hidden", "true");
-    overlayCol = null;
-  }
-  function syncProjMap() {
-    if (pinnedCol) renderProjMap(pinnedCol);
-    else if (overlayCol) renderProjMap(overlayCol);
-    else hideProjMap();
   }
 
   // --- Init ---
-  const projTable = document.getElementById("proj-table");
-  projTable.addEventListener("mouseover", ev => {
-    const col = projColFrom(ev.target);
-    if (col >= 1) { renderProjMap(col); positionProjMap(col, ev); }
-  });
-  projTable.addEventListener("mousemove", ev => {
-    const col = projColFrom(ev.target);
-    if (col >= 1 && col === overlayCol) positionProjMap(col, ev);
-  });
-  projTable.addEventListener("mouseleave", () => {
-    if (pinnedCol) renderProjMap(pinnedCol);
-    else hideProjMap();
-  });
-  projTable.addEventListener("click", ev => {
-    const col = projColFrom(ev.target);
-    if (col < 1) return;
-    if (pinnedCol === col) { pinnedCol = null; hideProjMap(); }
-    else { pinnedCol = col; renderProjMap(col); }
-  });
-
   function exportPayload() {
     return {
       app: "etfplaner", version: 1, exportedAt: new Date().toISOString(),

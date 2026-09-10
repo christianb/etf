@@ -259,15 +259,6 @@ tr:last-child td { border-bottom: none; }
 .etf-map .legend { margin-top: 8px; }
 
 .worldmap { display: block; width: 100%; height: auto; margin: 6px 0 10px; background: var(--map-bg); border-radius: calc(var(--radius-sm) - 4px); padding: 4px; }
-#proj-table th[data-col], #proj-table td[data-col] { cursor: pointer; }
-#proj-table td[data-col]:hover { background: var(--row-hover); }
-#proj-table th[data-col] { color: var(--accent); }
-.proj-table-box { position: relative; }
-.proj-map-overlay { position: absolute; z-index: 30; width: 210px; background: var(--card); border: 1px solid var(--strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); padding: 8px; pointer-events: none; }
-.proj-map-overlay[hidden] { display: none; }
-.proj-map-overlay.pinned { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-lg); }
-.proj-map-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.proj-map-overlay .worldmap { margin: 0; width: 100%; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; color: var(--muted); }
 .legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; }
 
