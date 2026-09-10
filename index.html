@@ -13,14 +13,18 @@
     <p class="subtitle" id="data-source"></p>
   </div>
   <div class="header-right">
-    <button id="btn-mode" class="icon-btn" title="Hell/Dunkel umschalten" aria-label="Farbmodus umschalten">
+    <div class="lang-toggle" id="btn-lang" role="group" data-i18n-aria="btn.lang">
+      <button type="button" class="lang-seg" data-lang="de">DE</button>
+      <button type="button" class="lang-seg" data-lang="en">EN</button>
+    </div>
+    <button id="btn-mode" class="icon-btn" data-i18n-title="btn.mode" data-i18n-aria="btn.modeAria">
       <svg id="ico-moon" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.7A6 6 0 0 1 6.3 2.5 6 6 0 1 0 13.5 9.7Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
       <svg id="ico-sun" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true" hidden><circle cx="8" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 .8v2M8 13.2v2M.8 8h2M13.2 8h2M2.9 2.9l1.4 1.4M11.7 11.7l1.4 1.4M13.1 2.9l-1.4 1.4M4.3 11.7l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
     </button>
     <div class="header-actions">
-      <button id="btn-export" class="btn-ghost" title="Bestand und Kauf-Rechner als JSON-Datei speichern">Export</button>
-      <button id="btn-import" class="btn-ghost" title="Bestand und Kauf-Rechner aus einer JSON-Datei laden">Import</button>
-      <button id="btn-reset" class="btn-ghost" title="Alle Eingaben löschen">Zurücksetzen</button>
+      <button id="btn-export" class="btn-ghost" data-i18n-title="btn.exportTitle"><span data-i18n="btn.export">Export</span></button>
+      <button id="btn-import" class="btn-ghost" data-i18n-title="btn.importTitle"><span data-i18n="btn.import">Import</span></button>
+      <button id="btn-reset" class="btn-ghost" data-i18n-title="btn.resetTitle"><span data-i18n="btn.reset">Zurücksetzen</span></button>
     </div>
   </div>
 </header>
@@ -28,7 +32,7 @@
 
 <main>
   <section id="holdings">
-    <h2>Mein Depot <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</span></div></h2>
+    <h2><span data-i18n="sec.holdings">Mein Depot</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.holdingsHint">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</span></div></h2>
     <div class="card">
       <div id="holdings-rows"></div>
       <div id="holdings-sum" class="holdings-sum"></div>
@@ -37,25 +41,25 @@
   </section>
 
   <section id="buy">
-    <h2>Monatlicher Sparplan <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</span></div></h2>
+    <h2><span data-i18n="sec.buy">Monatlicher Sparplan</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.buyHint">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</span></div></h2>
     <div class="card">
       <div id="buy-rows"></div>
       <div id="buy-sum" class="holdings-sum"></div>
       <div id="buy-fine-bar" class="holdings-fine"></div>
-      <h3>Regionsverteilung</h3>
+      <h3 data-i18n="sub.regions">Regionsverteilung</h3>
       <div class="table-wrap"><table id="buy-fine"></table></div>
     </div>
   </section>
 
   <section id="projection">
-    <h2>Depot-Entwicklung <div class="hint"><button class="hint-btn" type="button" aria-label="Hinweis anzeigen">?</button><span class="hint-text">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Monatlichen Sparplan (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</span></div></h2>
+    <h2><span data-i18n="sec.proj">Depot-Entwicklung</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.projHint">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Monatlichen Sparplan (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</span></div></h2>
     <div class="card">
       <div class="table-wrap"><table id="proj-table"></table></div>
       <div id="proj-rates" class="rate-chips"></div>
-      <h3>Empfohlene Zielverteilung</h3>
+      <h3 data-i18n="sub.target">Empfohlene Zielverteilung</h3>
       <div class="target-info">
-        <p class="target-vals">Amerika <strong>65 %</strong> · Europa <strong>15 %</strong> · Asien <strong>16 %</strong> · Rest der Welt <strong>4 %</strong></p>
-        <p class="muted">Das entspricht der globalen Marktkapitalisierung (FTSE All-World / MSCI ACWI) — der einzigen Gewichtung, die sich automatisch selbst korrigiert: Verliert eine Region an Bedeutung, sinkt ihr Gewicht, ohne dass du verkaufen musst. Es gibt keine belastbaren Belege, dass regionale Übergewichte langfristig Rendite bringen; historisch kostete ein Europa-Übergewicht (~15 % vs. Markt) vor allem Rendite, während Asien (~16 %) in einem reinen Industrieländer-Depot systematisch untergewichtet wäre. 4 % Südamerika/Afrika/Ozeanien entsprechen dem Marktanteil. Abweichungen davon sind eine bewusste Wette — die Prognose oben zeigt, wie sich deine Verteilung ohne Verkäufe über die Jahre Richtung Ziel bewegt.</p>
+        <p class="target-vals" data-i18n-html="target.vals">Amerika <strong>65 %</strong> · Europa <strong>15 %</strong> · Asien <strong>16 %</strong> · Rest der Welt <strong>4 %</strong></p>
+        <p class="muted" data-i18n-html="target.info">Das entspricht der globalen Marktkapitalisierung (FTSE All-World / MSCI ACWI) — der einzigen Gewichtung, die sich automatisch selbst korrigiert: Verliert eine Region an Bedeutung, sinkt ihr Gewicht, ohne dass du verkaufen musst. Es gibt keine belastbaren Belege, dass regionale Übergewichte langfristig Rendite bringen; historisch kostete ein Europa-Übergewicht (~15 % vs. Markt) vor allem Rendite, während Asien (~16 %) in einem reinen Industrieländer-Depot systematisch untergewichtet wäre. 4 % Südamerika/Afrika/Ozeanien entsprechen dem Marktanteil. Abweichungen davon sind eine bewusste Wette — die Prognose oben zeigt, wie sich deine Verteilung ohne Verkäufe über die Jahre Richtung Ziel bewegt.</p>
       </div>
     </div>
   </section>
@@ -67,6 +71,7 @@
 
 <script src="data.js"></script>
 <script src="calc.js"></script>
+<script src="i18n.js"></script>
 <script src="shared.js"></script>
 <script src="planen.js"></script>
 </body>

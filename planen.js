@@ -6,9 +6,11 @@
     purchases: [],
     holdings: [],
     rates: Object.assign({}, DEFAULT_RATES),
-    ui: { mode: null }
+    ui: { mode: null, lang: "de" }
   };
-  if (!state.ui) state.ui = { mode: null };
+  if (!state.ui) state.ui = { mode: null, lang: "de" };
+  if (!state.ui.lang) state.ui.lang = "de";
+  setLang(state.ui.lang);
 
   function normalizeRows(r) {
     if (Array.isArray(r)) return r.filter(x => x && typeof x === "object").map(x => ({ q: String(x.q || ""), v: Math.max(0, Number(x.v) || 0) }));
@@ -27,11 +29,12 @@
       const raw = localStorage.getItem(LS_KEY);
       if (!raw) return null;
       const s = JSON.parse(raw);
+      const ui = s.ui && typeof s.ui === "object" ? s.ui : {};
       return {
         purchases: normalizeRows(s.purchases),
         holdings: normalizeRows(s.holdings),
         rates: Object.assign({}, DEFAULT_RATES, s.rates),
-        ui: s.ui && typeof s.ui === "object" && (s.ui.mode === "dark" || s.ui.mode === "light") ? { mode: s.ui.mode } : null
+        ui: { mode: ui.mode === "dark" || ui.mode === "light" ? ui.mode : null, lang: ui.lang === "en" ? "en" : "de" }
       };
     } catch (e) { return null; }
   }
@@ -56,7 +59,7 @@
 
   function regionBarHTML(agg) {
     const entries = ETFCalc.FINE
-      .map(f => ({ label: ETFCalc.FINE_LABELS[f], value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
+      .map(f => ({ label: t("fine." + f), value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
       .filter(x => x.value > 0.04);
     const sum = entries.reduce((s, x) => s + x.value, 0) || 1;
     const bar = entries.map(x => `<div class="region-seg" style="width:${(x.value / sum * 100).toFixed(3)}%;background:${x.color}" title="${esc(x.label)}: ${fmtPct1(x.value)}"></div>`).join("");
@@ -72,12 +75,12 @@
     const known = !String(r.q || "").trim() || !!resolveEtf(r.q);
     const e = resolveEtf(r.q);
     return `<div class="hold-row">
-      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="WKN oder ISIN" autocomplete="off">
-      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="Betrag">
+      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off">
+      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
       <span class="hold-currency">€</span>
       ${isLast
-        ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="Übernehmen und neue Zeile anlegen">${ICON_PLUS}</button>`
-        : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="Eintrag löschen">${ICON_TRASH}</button>`}
+        ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="${esc(t("row.add"))}">${ICON_PLUS}</button>`
+        : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="${esc(t("row.del"))}">${ICON_TRASH}</button>`}
       <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
     </div>`;
   }
@@ -141,8 +144,8 @@
     const total = Object.values(byId).reduce((s, v) => s + v, 0);
     const positions = Object.values(byId).filter(v => v > 0).length;
     const unknown = unknownRows(rows);
-    document.getElementById(elId).innerHTML = `<span class="sum-label">${label} · ${positions} ${positions === 1 ? "Position" : "Positionen"}</span><span class="sum-value">${nfEur.format(total)}</span>`
-      + (unknown ? `<span class="muted sum-hint">(${unknown} ${unknown === 1 ? "Eintrag" : "Einträge"} ohne gültige WKN nicht gezählt)</span>` : "");
+    document.getElementById(elId).innerHTML = `<span class="sum-label">${label} · ${positions} ${tpl("sum.pos", positions)}</span><span class="sum-value">${fmtEuro(total)}</span>`
+      + (unknown ? `<span class="muted sum-hint">(${unknown} ${tpl("sum.unk", unknown)})</span>` : "");
   }
 
   // --- Bestand ---
@@ -155,7 +158,7 @@
     el.innerHTML = regionBarHTML(ETFCalc.aggregate(items));
   }
   function updateHoldingsSum() {
-    sumLine("holdings-sum", "Depotwert", sumById(state.holdings), state.holdings);
+    sumLine("holdings-sum", t("sum.holdings"), sumById(state.holdings), state.holdings);
     updateHoldingsFine();
   }
   function holdingsLive() { updateHoldingsSum(); renderProjRates(); updateProjection(); }
@@ -167,29 +170,27 @@
     const agg = ETFCalc.aggregate(items);
     document.getElementById("buy-fine-bar").innerHTML = items.length ? regionBarHTML(agg) : "";
     document.getElementById("buy-fine").innerHTML = items.length
-      ? `<tr><th>Region</th>${items.map(i => `<th class="num">${esc(i.etf.shortName)}</th>`).join("")}<th class="num">Kauf</th></tr>` +
-        ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
-      : `<tr><td class="muted">Noch keine Käufe eingegeben.</td></tr>`;
-    sumLine("buy-sum", "Kaufvolumen (monatlich)", byId, state.purchases);
+      ? `<tr><th>${esc(t("buy.colRegion"))}</th>${items.map(i => `<th class="num">${esc(etfShort(i.etf))}</th>`).join("")}<th class="num">${esc(t("buy.colTotal"))}</th></tr>` +
+        ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
+      : `<tr><td class="muted">${esc(t("buy.empty"))}</td></tr>`;
+    sumLine("buy-sum", t("sum.buy"), byId, state.purchases);
   }
   function buyLive() { updateBuy(); renderProjRates(); updateProjection(); }
 
   // --- Prognose ---
-  const FINE_SHORT = { nordamerika: "N-Am.", europa: "Europa", asien: "Asien", suedamerika: "S-Am.", afrika: "Afrika", australien: "Ozeanien" };
-
   function renderProjRates() {
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
     const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0);
     const el = document.getElementById("proj-rates");
     if (!list.length) {
-      el.innerHTML = `<span class="muted">Noch keine ETFs in Depot oder Sparplan erfasst.</span>`;
+      el.innerHTML = `<span class="muted">${esc(t("proj.emptyRates"))}</span>`;
       return;
     }
     el.innerHTML = list.map(e => `
-      <label class="rate-chip" data-tip="Rendite seit ${esc(e.inception.slice(0, 4))}: ${fmtPct1(e.perf.sinceInceptionPa)} p.a. (real)">
+      <label class="rate-chip" data-tip="${esc(t("proj.rateTip", { year: e.inception.slice(0, 4), pct: fmtPct1(e.perf.sinceInceptionPa) }))}">
         <span class="rate-dot" style="background:${ETF_COLORS[e.id]}"></span>
-        <span class="rate-name">${esc(e.shortName)}</span>
+        <span class="rate-name">${esc(etfShort(e))}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
         <span class="rate-unit">%</span>
       </label>`).join("");
@@ -210,16 +211,16 @@
     const hasInput = holdings.some(v => v > 0) || monthly.some(v => v > 0);
     const table = document.getElementById("proj-table");
     if (!hasInput) {
-      table.innerHTML = `<tr><td class="muted">Kein Bestand erfasst und keine monatlichen Käufe im Kauf-Rechner gesetzt.</td></tr>`;
+      table.innerHTML = `<tr><td class="muted">${esc(t("proj.empty"))}</td></tr>`;
       return;
     }
     const years = [0, 1, 2, 3, 5, 7, 10];
     const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
     const startYear = new Date().getFullYear();
-    const colLabel = y => y === 0 ? `${startYear} (heute)` : String(startYear + y);
-    const head = `<tr><th>Kennzahl</th>${years.map((y, i) => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
-    const rows = `<tr><td><strong>Depotwert</strong></td>${proj.map(p => `<td class="num"><strong>${nfEur.format(p.total)}</strong></td>`).join("")}</tr>`
-      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${ETFCalc.FINE_LABELS[f]}</td>${proj.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
+    const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
+    const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${years.map((y, i) => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
+    const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${proj.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
+      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${proj.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
         table.innerHTML = head + rows;
   }
 
@@ -228,7 +229,7 @@
     return {
       app: "etfplaner", version: 1, exportedAt: new Date().toISOString(),
       holdings: toRowArray(state.holdings), purchases: toRowArray(state.purchases),
-      ui: { mode: preferredMode() }
+      ui: { mode: preferredMode(), lang: I18N.current }
     };
   }
   function exportData() {
@@ -242,23 +243,27 @@
   }
   function importData(obj) {
     if (!obj || typeof obj !== "object" || (!Array.isArray(obj.holdings) && !Array.isArray(obj.purchases))) {
-      alert("Import fehlgeschlagen: Die Datei enthaelt kein gueltiges ETF-Planer-Format (holdings / purchases).");
+      alert(t("imp.failFormat"));
       return;
     }
     const h = normalizeRows(obj.holdings || []), p = normalizeRows(obj.purchases || []);
     const unknown = h.concat(p).filter(r => r.q && !resolveEtf(r.q)).length;
-    const msg = `Import: ${toRowArray(h).length} Bestands- und ${toRowArray(p).length} Kauf-Zeilen laden?`
-      + (unknown ? ` ACHTUNG: ${unknown} ${unknown === 1 ? "unbekannte WKN wird" : "unbekannte WKNs werden"} uebernommen, aber nicht gezaehlt.` : "");
+    const msg = t("imp.confirm", { h: toRowArray(h).length, p: toRowArray(p).length })
+      + (unknown ? " " + tpl("imp.warn", unknown) : "");
     if (!confirm(msg)) return;
     state.holdings.length = 0; state.holdings.push(...h);
     state.purchases.length = 0; state.purchases.push(...p);
     if (obj.ui && typeof obj.ui === "object" && (obj.ui.mode === "dark" || obj.ui.mode === "light")) {
       state.ui.mode = obj.ui.mode;
     }
+    if (obj.ui && typeof obj.ui === "object" && (obj.ui.lang === "en" || obj.ui.lang === "de")) {
+      state.ui.lang = obj.ui.lang;
+      setLang(obj.ui.lang);
+    }
     save();
-    holdEditor.render(); buyEditor.render();
-    updateHoldingsSum(); buyLive();
+    renderAll();
     applyUI();
+    applyLang();
   }
   document.getElementById("btn-export").addEventListener("click", exportData);
   const importInput = document.getElementById("import-file");
@@ -267,15 +272,15 @@
     const f = importInput.files && importInput.files[0];
     if (!f) return;
     const reader = new FileReader();
-    reader.onload = () => { try { importData(JSON.parse(String(reader.result))); } catch (e) { alert("Import fehlgeschlagen: Datei konnte nicht gelesen werden."); } importInput.value = ""; };
-    reader.onerror = () => { alert("Import fehlgeschlagen: Datei konnte nicht gelesen werden."); importInput.value = ""; };
+    reader.onload = () => { try { importData(JSON.parse(String(reader.result))); } catch (e) { alert(t("imp.badRead")); } importInput.value = ""; };
+    reader.onerror = () => { alert(t("imp.badRead")); importInput.value = ""; };
     reader.readAsText(f);
   });
 
-  document.getElementById("data-source").textContent = `Stand: ${ETF_DATA.asOf} · Alle Renditen in EUR (XETRA)`;
-  document.getElementById("disclaimer").textContent = "Keine Anlageberatung. Statische Daten — Performance der Vergangenheit schlägt sich nicht immer in der Zukunft nieder. Eingaben werden nur lokal im Browser gespeichert.";
+  document.getElementById("data-source").textContent = t("data.source", { date: ETF_DATA.asOf });
+  document.getElementById("disclaimer").textContent = t("footer.disclaimer");
   document.getElementById("btn-reset").addEventListener("click", () => {
-    if (!confirm("Alle lokalen Eingaben (Käufe, Bestand, Rendite-Annahmen) löschen?")) return;
+    if (!confirm(t("reset.confirm"))) return;
     localStorage.removeItem(LS_KEY);
     location.reload();
   });
@@ -301,6 +306,16 @@
     save(); applyUI();
   });
   applyUI();
+  applyLang();
+
+  const langBtn = document.getElementById("btn-lang");
+  if (langBtn) langBtn.addEventListener("click", ev => {
+    const seg = ev.target && ev.target.closest ? ev.target.closest("[data-lang]") : null;
+    if (!seg || !seg.dataset || !seg.dataset.lang) return;
+    setLang(seg.dataset.lang);
+    state.ui.lang = I18N.current;
+    save(); applyLang(); renderAll();
+  });
 
   document.addEventListener("wheel", ev => {
     const t = ev.target;
@@ -309,6 +324,14 @@
 
   const buyEditor = createRowEditor("buy-rows", state.purchases, buyLive);
   const holdEditor = createRowEditor("holdings-rows", state.holdings, holdingsLive);
+
+  function renderAll() {
+    holdEditor.render(); buyEditor.render();
+    document.getElementById("data-source").textContent = t("data.source", { date: ETF_DATA.asOf });
+    document.getElementById("disclaimer").textContent = t("footer.disclaimer");
+    updateHoldingsSum(); updateBuy(); renderProjRates(); updateProjection();
+  }
+
   updateBuy();
   updateHoldingsSum();
   renderProjRates();

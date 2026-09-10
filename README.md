@@ -9,6 +9,7 @@ A personal, static ETF planner (single page) for comparing, combining and planni
 - **Portfolio growth** – transposed projection table (today up to +10 years) based on monthly compound interest, including region drift. Per-ETF return assumptions editable (default 8/7/8.5 %).
 - **Recommended target allocation** – 65 % Americas / 15 % Europe / 16 % Asia / 4 % rest of the world (global market capitalization, FTSE All-World / MSCI ACWI).
 - **Light/dark mode**, **export/import** as JSON file, local persistence via `localStorage` (`etfplaner.v1`).
+- **DE/EN language switcher** – all UI strings and region labels switch between German and English; number formats follow the selected language (de-DE / en-GB).
 
 ## Quick start
 
@@ -39,12 +40,13 @@ Example target allocation: **70 % World / 20 % EMU / 10 % EM** (≈ 54 % America
 | `index.html` | The single "Planner" page (Portfolio · Savings plan · Projection) |
 | `data.js` | `ETF_DATA` – static snapshot from Finanzfluss/justETF (single source of truth) |
 | `calc.js` | Pure calculation logic (DOM-free): `aggregate()`, `solve()`, `project()`, `macroOf()`, `parseEuro()`, `parseHoldings()` |
+| `i18n.js` | DE/EN localization (dictionary `I18N.strings`, `t()`/`tpl()`, `setLang()`/`applyLang()`) |
 | `shared.js` | Shared globals (`ETFS`, colors, formatting, world-map engine) |
 | `planen.js` | Interactive UI logic (row editors, projection, export/import) |
 | `style.css` | CSS variables + global styles (light/dark via `data-mode`) |
 | `tools/` | `update-etf-data.py` (data refresh from Finanzfluss), `gen-world-grid.js` + `countries.geo.json` (world-map raster) |
 
-Script order: `data.js → calc.js → shared.js → planen.js`.
+Script order: `data.js → calc.js → i18n.js → shared.js → planen.js`.
 
 ### Region model
 
@@ -74,7 +76,7 @@ console.log(r.w.map(v=>Math.round(v)));"
 # Expected ≈ [16935, 2227, 10838]
 ```
 
-UI logic: `planen.js` can be run in Node with a minimal DOM stub (see `AGENTS.md`).
+UI logic: `planen.js` (together with `data.js`, `calc.js`, `i18n.js`, `shared.js`) can be run in Node with a minimal DOM stub (see `AGENTS.md`).
 
 ## Legal disclaimer
 

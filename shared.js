@@ -3,10 +3,10 @@ const ETFS = ETF_DATA.etfs;
 const BAR_COLORS = { nordamerika: "#eab308", europa: "#3b82f6", asien: "#22c55e", suedamerika: "#ef4444", afrika: "#92400e", australien: "#a855f7" };
 const ETF_COLORS = Object.fromEntries(ETFS.map(e => [e.id, e.color]));
 
-const nfEur = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
-const fmtPct = v => v == null ? "—" : v.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
-const fmtPct1 = v => (Number(v) || 0).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
-const fmtPerf = v => v == null ? '<span class="muted">—</span>' : `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : ""}${v.toLocaleString("de-DE", { maximumFractionDigits: 2 })} %</span>`;
+function fmtEuro(v) { return new Intl.NumberFormat(I18N.numLocale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v); }
+const fmtPct = v => v == null ? "—" : (Number(v) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
+const fmtPct1 = v => ((Number(v) || 0) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
+const fmtPerf = v => v == null ? '<span class="muted">—</span>' : `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : ""}${v.toLocaleString(I18N.numLocale, { maximumFractionDigits: 2 })} %</span>`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 const WORLD_GRID = [
@@ -67,10 +67,10 @@ function worldMapSVG(regions, cls) {
       const pct = regions[region] || 0;
       const covered = pct > 0.04;
       const fill = covered ? intensityFill(pct) : "#dfe3e8";
-      rects.push(`<rect x="${x * CELL_W}" y="${y * CELL_H}" width="${CELL_W - 1}" height="${CELL_H - 1}" rx="1" fill="${fill}"><title>${ETFCalc.FINE_LABELS[region]}${covered ? ": " + fmtPct1(pct) : " — nicht enthalten"}</title></rect>`);
+      rects.push(`<rect x="${x * CELL_W}" y="${y * CELL_H}" width="${CELL_W - 1}" height="${CELL_H - 1}" rx="1" fill="${fill}"><title>${t("fine." + region)}${covered ? ": " + fmtPct1(pct) : " — " + t("map.not")}</title></rect>`);
     }
   });
   const w = WORLD_GRID[0].length * CELL_W, h = WORLD_GRID.length * CELL_H;
   const PAD = 8, PADV = 10;
-  return `<svg class="${cls || "worldmap"}" viewBox="${-PAD} ${-PADV} ${w + 2*PAD} ${h + 2*PADV}" shape-rendering="crispEdges" role="img" aria-label="Weltkarte der Regionsverteilung">${rects.join("")}</svg>`;
+  return `<svg class="${cls || "worldmap"}" viewBox="${-PAD} ${-PADV} ${w + 2*PAD} ${h + 2*PADV}" shape-rendering="crispEdges" role="img" aria-label="${t("map.aria")}">${rects.join("")}</svg>`;
 }

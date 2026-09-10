@@ -197,6 +197,29 @@ h3 {
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--strong); background: var(--accent-soft); }
 
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--card);
+}
+.lang-seg {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.lang-seg + .lang-seg { border-left: 1px solid var(--border); }
+.lang-seg:hover { color: var(--accent); }
+.lang-seg.active { background: var(--accent-soft); color: var(--accent); }
+
 input[type=number], input:not([type]), textarea {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
