@@ -311,7 +311,7 @@ footer { padding: 16px 24px 36px; max-width: 1060px; margin: 0 auto; }
 .hold-q::placeholder { color: var(--muted); opacity: 0.7; }
 .hold-name { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hold-v { width: 150px; flex: none; text-align: center; }
-.hold-currency { color: var(--muted); flex: none; font-size: 14px; margin: 0 6px; }
+.hold-currency { color: var(--muted); flex: none; font-size: 14px; margin: 0 0 0 2px; padding-right: 10px; }
 
 .input-err { border-color: var(--red); background: var(--err-bg); }
 .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 9px; cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; transition: color 0.15s, border-color 0.15s, background 0.15s; }
