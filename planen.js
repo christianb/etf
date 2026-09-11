@@ -324,6 +324,26 @@
     if (t && t.type === "number") t.blur();
   }, { passive: true });
 
+  // --- Navigation: aktiver Link + Offset fürs Ankern ---
+  const navLinks = typeof document.querySelectorAll === "function"
+    ? Array.from(document.querySelectorAll(".sec-nav-link"))
+    : [];
+  function updateNavOffset() {
+    const h = typeof document.querySelector === "function" ? document.querySelector("header") : null;
+    if (h) document.documentElement.style.setProperty("--nav-offset", (h.offsetHeight + 8) + "px");
+  }
+  updateNavOffset();
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") window.addEventListener("resize", updateNavOffset);
+  if (typeof window !== "undefined" && "IntersectionObserver" in window) {
+    const spySections = navLinks.map(a => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+    const spy = new IntersectionObserver(entries => {
+      const top = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!top) return;
+      navLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + top.target.id));
+    }, { rootMargin: "-20% 0px -60% 0px", threshold: [0, 0.2, 0.5, 1] });
+    spySections.forEach(s => spy.observe(s));
+  }
+
   const buyEditor = createRowEditor("buy-rows", state.purchases, buyLive);
   const holdEditor = createRowEditor("holdings-rows", state.holdings, holdingsLive);
 
