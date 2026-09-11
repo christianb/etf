@@ -75,12 +75,12 @@
     const known = !String(r.q || "").trim() || !!resolveEtf(r.q);
     const e = resolveEtf(r.q);
     return `<div class="hold-row">
-      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off">
-      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
-      <span class="hold-currency">€</span>
       ${isLast
         ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="${esc(t("row.add"))}">${ICON_PLUS}</button>`
         : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="${esc(t("row.del"))}">${ICON_TRASH}</button>`}
+      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off">
+      <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
+      <span class="hold-currency">€</span>
       <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
     </div>`;
   }
