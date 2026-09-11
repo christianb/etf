@@ -39,7 +39,7 @@
 
 <main>
   <section id="holdings">
-    <h2><span data-i18n="sec.holdings">Mein Depot</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.holdingsHint">Pro Zeile WKN oder ISIN und Betrag in €. „＋" übernimmt und öffnet darunter eine neue Zeile — ist die WKN schon vorhanden, wird der Betrag in die bestehende Zeile addiert. Der Mülleimer entfernt den Eintrag, Werte bleiben jederzeit editierbar.</span></div></h2>
+    <h2><span data-i18n="sec.holdings">Mein Depot</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.holdingsHint">Trage hier ein, was du bereits besitzt — pro ETF eine Zeile mit WKN oder ISIN und Betrag.</span></div></h2>
     <div class="card">
       <div id="holdings-rows"></div>
       <div id="holdings-sum" class="holdings-sum"></div>
@@ -48,7 +48,7 @@
   </section>
 
   <section id="buy">
-    <h2><span data-i18n="sec.buy">Monatlicher Sparplan</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.buyHint">Pro Zeile WKN oder ISIN und monatlicher Betrag in €. „＋" übernimmt und öffnet eine neue Zeile — bei doppelter WKN wird der Betrag in die bestehende Zeile addiert; der Mülleimer entfernt sie.</span></div></h2>
+    <h2><span data-i18n="sec.buy">Monatlicher Sparplan</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.buyHint">Trage hier ein, was du monatlich kaufen willst — pro ETF eine Zeile mit WKN oder ISIN und Betrag.</span></div></h2>
     <div class="card">
       <div id="buy-rows"></div>
       <div id="buy-sum" class="holdings-sum"></div>
@@ -59,7 +59,7 @@
   </section>
 
   <section id="projection">
-    <h2><span data-i18n="sec.proj">Depot-Entwicklung</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.projHint">Basis: dein Bestand (Sektion 1) + die monatlichen Käufe aus dem Monatlichen Sparplan (Sektion 2), verzinst mit monatlichem Zinseszins. Die Renditen sind langfristige Annahmen — anpassbar, keine Garantie.</span></div></h2>
+    <h2><span data-i18n="sec.proj">Depot-Entwicklung</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.projHint">Zeigt, wie sich dein Depot entwickeln könnte: Bestand plus Sparplan, mit deinen Rendite-Annahmen.</span></div></h2>
     <div class="card">
       <div class="table-wrap"><table id="proj-table"></table></div>
       <div id="proj-rates" class="rate-chips"></div>
