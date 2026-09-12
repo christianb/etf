@@ -80,6 +80,14 @@
   // --- generischer Zeilen-Editor (Bestand + Kauf-Rechner) ---
   const ICON_PLUS = `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
   const ICON_TRASH = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6.5 2h3M4 4l.8 10h6.4L12 4M6.5 7v4M9.5 7v4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
+  const GROUP_REGION = { world: "nordamerika", europa: "europa", em: "asien" };
+
+  function groupBadgeStyle(g) {
+    return "--grp:" + BAR_COLORS[GROUP_REGION[g]];
+  }
+  function groupBadgeAttr(g) {
+    return ` style="${groupBadgeStyle(g)}"`;
+  }
 
   function rowHTML(r, i, isLast) {
     const known = !String(r.q || "").trim() || !!resolveEtf(r.q);
@@ -91,7 +99,7 @@
       <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off" list="etf-list">
       <span class="hold-name-wrap" data-idx="${i}">
         <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
-        <span class="hold-group${e ? "" : " is-hidden"}" data-idx="${i}">${e ? esc(t("grp." + ETFCalc.groupOf(e))) : ""}</span>
+        <span class="hold-group${e ? "" : " is-hidden"}"${e ? groupBadgeAttr(ETFCalc.groupOf(e)) : ""} data-idx="${i}">${e ? esc(t("grp." + ETFCalc.groupOf(e))) : ""}</span>
       </span>
       <span class="hold-v-wrap${e ? "" : " is-hidden"}" data-idx="${i}">
         <span class="hold-v-euro">€</span>
@@ -122,8 +130,16 @@
         }
         const grpEl = el.querySelector ? el.querySelector('.hold-group[data-idx="' + d.idx + '"]') : null;
         if (grpEl) {
-          if (e) { grpEl.textContent = t("grp." + ETFCalc.groupOf(e)); if (grpEl.classList) grpEl.classList.remove("is-hidden"); }
-          else { grpEl.textContent = ""; if (grpEl.classList) grpEl.classList.add("is-hidden"); }
+          if (e) {
+            const g = ETFCalc.groupOf(e);
+            grpEl.textContent = t("grp." + g);
+            if (grpEl.setAttribute) grpEl.setAttribute("style", groupBadgeStyle(g));
+            if (grpEl.classList) grpEl.classList.remove("is-hidden");
+          } else {
+            grpEl.textContent = "";
+            if (grpEl.removeAttribute) grpEl.removeAttribute("style");
+            if (grpEl.classList) grpEl.classList.add("is-hidden");
+          }
         }
         const vWrap = el.querySelector ? el.querySelector('.hold-v-wrap[data-idx="' + d.idx + '"]') : null;
         if (vWrap && vWrap.classList) vWrap.classList.toggle("is-hidden", !e);
@@ -226,7 +242,7 @@
       <label class="rate-chip" data-tip="${esc(t("proj.rateTip", { year: e.inception.slice(0, 4), pct: fmtPct1(e.perf.sinceInceptionPa) }))}">
         <span class="rate-dot" style="background:${ETF_COLORS[e.id]}"></span>
         <span class="rate-name">${esc(e.wkn)}</span>
-        <span class="rate-group hold-group">${esc(t("grp." + ETFCalc.groupOf(e)))}</span>
+        <span class="rate-group hold-group"${groupBadgeAttr(ETFCalc.groupOf(e))}>${esc(t("grp." + ETFCalc.groupOf(e)))}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
         <span class="rate-unit">%</span>
       </label>`).join("");
