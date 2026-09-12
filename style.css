@@ -186,6 +186,9 @@ h3 {
   box-shadow: var(--shadow-lg);
   color: var(--muted);
   font-size: 13px;
+  font-weight: normal;
+  letter-spacing: 0;
+  text-transform: none;
   text-align: left;
   white-space: normal;
   width: max-content;
@@ -197,6 +200,7 @@ h3 {
   transition: opacity 0.12s, visibility 0.12s;
 }
 .hint:hover .hint-text, .hint:focus-within .hint-text { opacity: 1; visibility: visible; pointer-events: auto; }
+h2 .hint-text { white-space: nowrap; max-width: none; }
 
 .btn {
   background: var(--accent);
@@ -425,4 +429,4 @@ footer { padding: 16px 24px 36px; max-width: 1060px; margin: 0 auto; }
 .target-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .target-vals { margin: 0; font-size: 14px; }
 .target-hint { flex: 0 0 auto; margin: 0; }
-.target-hint .hint-text { top: calc(100% + 8px); left: auto; right: 0; }
+.target-hint .hint-text { top: calc(100% + 8px); left: auto; right: 0; width: min(760px, calc(100vw - 40px)); max-width: none; }
