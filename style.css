@@ -344,7 +344,10 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
 .hold-row > button { display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; }
 .hold-q { width: 150px; flex: none; text-align: center; }
 .hold-q::placeholder { color: var(--muted); opacity: 0.7; }
-.hold-name { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.hold-name-wrap { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.hold-name { min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hold-group { flex: none; font-size: 11px; font-weight: 600; line-height: 1; padding: 5px 9px; border-radius: 999px; background: var(--track); color: var(--muted); white-space: nowrap; }
+.hold-group.is-hidden { display: none; }
 .hold-v-wrap { position: relative; flex: none; }
 .hold-v-wrap.is-hidden { display: none; }
 .hold-v-wrap .hold-v { width: 150px; height: 38px; box-sizing: border-box; text-align: center; padding-right: 18px; }
@@ -460,5 +463,5 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .hold-row { flex-wrap: wrap; }
   .hold-q { width: 110px; }
   .hold-v-wrap .hold-v { width: 110px; }
-  .hold-name { flex: 1 1 100%; }
+  .hold-name-wrap { flex: 1 1 100%; }
 }

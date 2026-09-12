@@ -3,7 +3,6 @@ const ETF_DATA = {
   etfs: [
     {
       id: "world",
-      group: "world",
       color: "#3b82f6",
       defaultRate: 8.0,
       name: "Amundi MSCI World ESG Broad Transition UCITS ETF",
@@ -27,7 +26,6 @@ const ETF_DATA = {
     },
     {
       id: "emu",
-      group: "europa",
       color: "#f59e0b",
       defaultRate: 7.0,
       name: "Amundi MSCI EMU ESG Broad Transition UCITS ETF",
@@ -51,7 +49,6 @@ const ETF_DATA = {
     },
     {
       id: "em",
-      group: "em",
       color: "#10b981",
       defaultRate: 8.5,
       name: "iShares MSCI EM ESG Enhanced UCITS ETF USD (Acc)",
@@ -75,7 +72,6 @@ const ETF_DATA = {
     },
     {
       id: "worldsri",
-      group: "world",
       color: "#8b5cf6",
       defaultRate: 8.0,
       name: "iShares MSCI World SRI UCITS ETF (Acc)",
@@ -99,7 +95,6 @@ const ETF_DATA = {
     },
     {
       id: "eusri",
-      group: "europa",
       color: "#0ea5e9",
       defaultRate: 7.0,
       name: "iShares MSCI Europe SRI UCITS ETF (Acc)",
@@ -123,7 +118,6 @@ const ETF_DATA = {
     },
     {
       id: "esg-global-all-cap",
-      group: "world",
       color: "#a3e635",
       defaultRate: 8.0,
       name: "Vanguard ESG Global All Cap UCITS ETF",
@@ -147,7 +141,6 @@ const ETF_DATA = {
     },
     {
       id: "core-stoxx-europe-600",
-      group: "europa",
       color: "#ef4444",
       defaultRate: 7.0,
       name: "Amundi Core Stoxx Europe 600 UCITS ETF (Acc)",
@@ -171,7 +164,6 @@ const ETF_DATA = {
     },
     {
       id: "msci-em-ex-china",
-      group: "em",
       color: "#ec4899",
       defaultRate: 8.0,
       name: "iShares MSCI EM ex China UCITS ETF",

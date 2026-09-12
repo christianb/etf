@@ -89,7 +89,10 @@
         ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="${esc(t("row.add"))}">${ICON_PLUS}</button>`
         : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="${esc(t("row.del"))}">${ICON_TRASH}</button>`}
       <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off" list="etf-list">
-      <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
+      <span class="hold-name-wrap" data-idx="${i}">
+        <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
+        <span class="hold-group${e ? "" : " is-hidden"}" data-idx="${i}">${e ? esc(t("grp." + ETFCalc.groupOf(e))) : ""}</span>
+      </span>
       <span class="hold-v-wrap${e ? "" : " is-hidden"}" data-idx="${i}">
         <span class="hold-v-euro">€</span>
         <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
@@ -116,6 +119,11 @@
         if (nameEl) {
           nameEl.textContent = e ? e.name : "";
           if (e) nameEl.setAttribute("title", e.name); else nameEl.removeAttribute("title");
+        }
+        const grpEl = el.querySelector ? el.querySelector('.hold-group[data-idx="' + d.idx + '"]') : null;
+        if (grpEl) {
+          if (e) { grpEl.textContent = t("grp." + ETFCalc.groupOf(e)); if (grpEl.classList) grpEl.classList.remove("is-hidden"); }
+          else { grpEl.textContent = ""; if (grpEl.classList) grpEl.classList.add("is-hidden"); }
         }
         const vWrap = el.querySelector ? el.querySelector('.hold-v-wrap[data-idx="' + d.idx + '"]') : null;
         if (vWrap && vWrap.classList) vWrap.classList.toggle("is-hidden", !e);
@@ -208,7 +216,7 @@
     const pById = sumById(state.purchases);
     const GROUP_ORDER = { world: 0, europa: 1, em: 2 };
     const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0)
-      .sort((a, b) => GROUP_ORDER[a.group] - GROUP_ORDER[b.group]);
+      .sort((a, b) => GROUP_ORDER[ETFCalc.groupOf(a)] - GROUP_ORDER[ETFCalc.groupOf(b)]);
     const el = document.getElementById("proj-rates");
     if (!list.length) {
       el.innerHTML = `<span class="muted">${esc(t("proj.emptyRates"))}</span>`;

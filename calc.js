@@ -14,6 +14,18 @@ const ETFCalc = (() => {
     return { amerika: r.nordamerika, europa: r.europa, em: 0, rest: 100 - r.nordamerika - r.europa };
   }
 
+  const GROUP_RULES = [
+    ["europa", /\b(emu|eurozone|euro ?stoxx|stoxx|dax|mdax)\b|europe|europa/i],
+    ["em", /\bem\b|emerging|schwellenl/i],
+    ["world", /world|global|all ?cap|acwi|all ?world/i]
+  ];
+
+  function groupOf(etf) {
+    const label = `${etf.name || ""} ${etf.shortName || ""}`;
+    for (const [g, re] of GROUP_RULES) if (re.test(label)) return g;
+    return "world";
+  }
+
   function aggregate(items) {
     const total = items.reduce((s, i) => s + i.value, 0);
     const macro = {}; BUCKETS.forEach(b => macro[b] = 0);
@@ -201,7 +213,7 @@ const ETFCalc = (() => {
     });
   }
 
-  return { BUCKETS, FINE, BUCKET_LABELS, FINE_LABELS, macroOf, aggregate, solve, project, parseEuro, parseHoldings, parseTargets };
+  return { BUCKETS, FINE, BUCKET_LABELS, FINE_LABELS, macroOf, groupOf, aggregate, solve, project, parseEuro, parseHoldings, parseTargets };
 })();
 
 if (typeof module !== "undefined") module.exports = ETFCalc;
