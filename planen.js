@@ -6,10 +6,14 @@
     purchases: [],
     holdings: [],
     rates: Object.assign({}, DEFAULT_RATES),
+    rateMode: "perEtf",
+    rateSingle: 8,
     ui: { mode: null, lang: "de" }
   };
   if (!state.ui) state.ui = { mode: null, lang: "de" };
   if (!state.ui.lang) state.ui.lang = "de";
+  if (state.rateMode !== "single") state.rateMode = "perEtf";
+  if (!Number.isFinite(state.rateSingle) || state.rateSingle < 0) state.rateSingle = 8;
   setLang(state.ui.lang);
 
   function normalizeRows(r) {
@@ -34,6 +38,8 @@
         purchases: normalizeRows(s.purchases),
         holdings: normalizeRows(s.holdings),
         rates: Object.assign({}, DEFAULT_RATES, s.rates),
+        rateMode: s.rateMode === "single" ? "single" : "perEtf",
+        rateSingle: Number.isFinite(Number(s.rateSingle)) ? Math.max(0, Number(s.rateSingle)) : 8,
         ui: { mode: ui.mode === "dark" || ui.mode === "light" ? ui.mode : null, lang: ui.lang === "en" ? "en" : "de" }
       };
     } catch (e) { return null; }
@@ -227,7 +233,18 @@
   function buyLive() { updateBuy(); renderProjRates(); updateProjection(); }
 
   // --- Prognose ---
+  function renderRateMode() {
+    const el = document.getElementById("rate-mode");
+    if (!el || !el.querySelectorAll) return;
+    el.querySelectorAll("[data-rate-mode]").forEach(b => {
+      const active = b.getAttribute("data-rate-mode") === state.rateMode;
+      if (b.classList) b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
+  }
+
   function renderProjRates() {
+    renderRateMode();
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
     const GROUP_ORDER = { world: 0, europa: 1, em: 2 };
@@ -236,6 +253,20 @@
     const el = document.getElementById("proj-rates");
     if (!list.length) {
       el.innerHTML = `<span class="muted">${esc(t("proj.emptyRates"))}</span>`;
+      return;
+    }
+    if (state.rateMode === "single") {
+      el.innerHTML = `
+      <label class="rate-chip">
+        <span class="rate-name">${esc(t("rate.singleName"))}</span>
+        <input class="rate-v" type="number" id="rate-single" min="0" max="20" step="0.1" value="${state.rateSingle}">
+        <span class="rate-unit">%</span>
+      </label>`;
+      const inp = document.getElementById("rate-single");
+      if (inp) inp.addEventListener("input", ev => {
+        state.rateSingle = Math.max(0, parseFloat(ev.target.value) || 0);
+        save(); updateProjection();
+      });
       return;
     }
     el.innerHTML = list.map(e => `
@@ -253,12 +284,18 @@
     });
   }
 
+  function ratesArray() {
+    return state.rateMode === "single"
+      ? ETFS.map(() => state.rateSingle)
+      : ETFS.map(e => state.rates[e.id] || 0);
+  }
+
   function updateProjection() {
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
     const holdings = ETFS.map(e => hById[e.id] || 0);
     const monthly = ETFS.map(e => pById[e.id] || 0);
-    const rates = ETFS.map(e => state.rates[e.id] || 0);
+    const rates = ratesArray();
     const hasInput = holdings.some(v => v > 0) || monthly.some(v => v > 0);
     const table = document.getElementById("proj-table");
     if (!hasInput) {
@@ -282,6 +319,7 @@
     return {
       app: "etfplaner", version: 1, exportedAt: new Date().toISOString(),
       holdings: toRowArray(state.holdings), purchases: toRowArray(state.purchases),
+      rateMode: state.rateMode, rateSingle: state.rateSingle,
       ui: { mode: preferredMode(), lang: I18N.current }
     };
   }
@@ -306,6 +344,10 @@
     if (!confirm(msg)) return;
     state.holdings.length = 0; state.holdings.push(...h);
     state.purchases.length = 0; state.purchases.push(...p);
+    if (obj.rateMode === "single" || obj.rateMode === "perEtf") state.rateMode = obj.rateMode;
+    if (obj.rateSingle != null && Number.isFinite(Number(obj.rateSingle))) {
+      state.rateSingle = Math.max(0, Number(obj.rateSingle));
+    }
     if (obj.ui && typeof obj.ui === "object" && (obj.ui.mode === "dark" || obj.ui.mode === "light")) {
       state.ui.mode = obj.ui.mode;
     }
@@ -392,6 +434,16 @@
     setLang(seg.dataset.lang);
     state.ui.lang = I18N.current;
     save(); applyLang(); renderAll();
+  });
+
+  const rateModeEl = document.getElementById("rate-mode");
+  if (rateModeEl) rateModeEl.addEventListener("click", ev => {
+    const seg = ev.target && ev.target.closest ? ev.target.closest("[data-rate-mode]") : null;
+    if (!seg || !seg.dataset || !seg.dataset.rateMode) return;
+    const mode = seg.dataset.rateMode === "single" ? "single" : "perEtf";
+    if (mode === state.rateMode) return;
+    state.rateMode = mode;
+    save(); renderProjRates(); updateProjection();
   });
 
   document.addEventListener("wheel", ev => {

@@ -85,7 +85,13 @@
       <div class="table-wrap"><table id="proj-table"></table></div>
       <div class="proj-foot">
         <div class="proj-col">
-          <h3 data-i18n="sub.rates">Rendite-Annahmen</h3>
+          <div class="proj-col-head">
+            <h3 data-i18n="sub.rates">Rendite-Annahmen</h3>
+            <div class="lang-toggle" id="rate-mode" role="group" data-i18n-aria="rate.modeAria">
+              <button type="button" class="lang-seg" data-rate-mode="single" data-i18n="rate.modeSingle">Alle</button>
+              <button type="button" class="lang-seg" data-rate-mode="perEtf" data-i18n="rate.modePerEtf">Einzeln</button>
+            </div>
+          </div>
           <div id="proj-rates" class="rate-chips"></div>
         </div>
         <div class="proj-col">
