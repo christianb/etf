@@ -204,6 +204,7 @@ h3 {
   transition: opacity 0.12s, visibility 0.12s;
 }
 .hint:hover .hint-text, .hint:focus-within .hint-text { opacity: 1; visibility: visible; pointer-events: auto; }
+.hint-text-wide { max-width: min(640px, calc(100vw - 90px)); }
 
 .btn {
   background: var(--accent);
@@ -431,7 +432,7 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
 .target-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .target-vals { margin: 0; font-size: 14px; }
 .target-hint { flex: 0 0 auto; margin: 0; }
-.target-hint .hint-text { top: calc(100% + 8px); left: auto; right: 0; width: min(760px, calc(100vw - 40px)); max-width: none; }
+.target-hint .hint-text { top: 0; left: auto; right: calc(100% + 6px); width: min(760px, calc(100vw - 90px)); max-width: none; }
 
 .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 34px; }
 .kpi-tile { display: flex; flex-direction: column; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
