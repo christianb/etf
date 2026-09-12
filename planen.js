@@ -225,7 +225,7 @@
     const agg = ETFCalc.aggregate(items);
     document.getElementById("buy-fine-bar").innerHTML = items.length ? regionBarHTML(agg) : "";
     document.getElementById("buy-fine").innerHTML = items.length
-      ? `<tr><th>${esc(t("buy.colRegion"))}</th>${items.map(i => `<th class="num">${esc(etfShort(i.etf))}</th>`).join("")}<th class="num">${esc(t("buy.colTotal"))}</th></tr>` +
+      ? `<tr><th>${esc(t("buy.colRegion"))}</th>${items.map(i => `<th class="num">${esc(i.etf.wkn)}</th>`).join("")}<th class="num">${esc(t("buy.colTotal"))}</th></tr>` +
         ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${items.map(i => `<td class="num">${fmtPct1(i.etf.regions[f])}</td>`).join("")}<td class="num"><strong>${fmtPct1(agg.fine[f])}</strong></td></tr>`).join("")
       : `<tr><td class="muted">${esc(t("buy.empty"))}</td></tr>`;
     sumLine("buy-sum", t("sum.buy"), byId, state.purchases);
