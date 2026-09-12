@@ -57,6 +57,16 @@
     return rows.filter(r => String(r.q || "").trim() && !resolveEtf(r.q)).length;
   }
 
+  function renderEtfDatalist() {
+    const el = document.getElementById("etf-list");
+    if (!el) return;
+    const out = [];
+    for (const e of ETFS) {
+      out.push(`<option value="${esc(e.wkn)}">${esc(e.name)}</option>`);
+    }
+    el.innerHTML = out.join("");
+  }
+
   function regionBarHTML(agg) {
     const entries = ETFCalc.FINE
       .map(f => ({ label: t("fine." + f), value: agg.fine[f] || 0, color: BAR_COLORS[f] }))
@@ -78,7 +88,7 @@
       ${isLast
         ? `<button class="icon-btn" data-act="add" data-idx="${i}" title="${esc(t("row.add"))}">${ICON_PLUS}</button>`
         : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="${esc(t("row.del"))}">${ICON_TRASH}</button>`}
-      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off">
+      <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off" list="etf-list">
       <span class="hold-v-wrap">
         <span class="hold-v-euro">€</span>
         <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
@@ -165,6 +175,17 @@
   }
   function holdingsLive() { updateHoldingsSum(); renderProjRates(); updateProjection(); }
 
+  function updateKpis(projLast) {
+    const hTotal = Object.values(sumById(state.holdings)).reduce((s, v) => s + v, 0);
+    const mTotal = Object.values(sumById(state.purchases)).reduce((s, v) => s + v, 0);
+    const set = (id, txt) => { const n = document.getElementById(id); if (n) n.textContent = txt; };
+    set("kpi-holdings", fmtEuro(hTotal));
+    set("kpi-buy", fmtEuro(mTotal));
+    const lbl = document.getElementById("kpi-proj-label");
+    if (lbl) lbl.textContent = t("kpi.proj", { year: new Date().getFullYear() + 10 });
+    set("kpi-proj", projLast ? fmtEuro(projLast.total) : "–");
+  }
+
   // --- Kauf-Rechner ---
   function updateBuy() {
     const byId = sumById(state.purchases);
@@ -216,6 +237,7 @@
     const table = document.getElementById("proj-table");
     if (!hasInput) {
       table.innerHTML = `<tr><td class="muted">${esc(t("proj.empty"))}</td></tr>`;
+      updateKpis(null);
       return;
     }
     const years = [0, 1, 2, 3, 5, 7, 10];
@@ -226,6 +248,7 @@
     const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${proj.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${proj.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
         table.innerHTML = head + rows;
+    updateKpis(proj[proj.length - 1]);
   }
 
   // --- Init ---
@@ -289,6 +312,29 @@
     location.reload();
   });
 
+  const moreBtn = document.getElementById("btn-more");
+  const headerMenu = document.getElementById("header-menu");
+  function closeMenu() {
+    if (headerMenu) headerMenu.hidden = true;
+    if (moreBtn) moreBtn.setAttribute("aria-expanded", "false");
+  }
+  if (moreBtn && headerMenu) {
+    headerMenu.hidden = true;
+    moreBtn.addEventListener("click", ev => {
+      if (ev.stopPropagation) ev.stopPropagation();
+      const open = headerMenu.hidden;
+      headerMenu.hidden = !open;
+      moreBtn.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("click", ev => {
+      if (headerMenu.hidden) return;
+      const tgt = ev.target;
+      if (tgt && tgt.closest && tgt.closest("#header-menu, #btn-more")) return;
+      closeMenu();
+    });
+    document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeMenu(); });
+  }
+
   // --- Design: Hell/Dunkel ---
   function preferredMode() {
     if (state.ui.mode) return state.ui.mode;
@@ -311,6 +357,7 @@
   });
   applyUI();
   applyLang();
+  renderEtfDatalist();
 
   const langBtn = document.getElementById("btn-lang");
   if (langBtn) langBtn.addEventListener("click", ev => {
