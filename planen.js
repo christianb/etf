@@ -416,8 +416,8 @@
     const root = document.documentElement;
     if (root && root.setAttribute) root.setAttribute("data-mode", mode);
     const sun = document.getElementById("ico-sun"), moon = document.getElementById("ico-moon");
-    if (sun) sun.hidden = mode !== "dark";
-    if (moon) moon.hidden = mode === "dark";
+    if (sun) sun.hidden = mode !== "light";
+    if (moon) moon.hidden = mode !== "dark";
   }
   document.getElementById("btn-mode").addEventListener("click", () => {
     state.ui.mode = preferredMode() === "dark" ? "light" : "dark";

@@ -341,6 +341,9 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
 .input-err { border-color: var(--red); background: var(--err-bg); }
 .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 9px; cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; transition: color 0.15s, border-color 0.15s, background 0.15s; }
 .icon-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+#btn-mode svg { display: none; }
+[data-mode="light"] #ico-sun { display: block; }
+[data-mode="dark"] #ico-moon { display: block; }
 .icon-del:hover { color: var(--red); border-color: var(--red); background: var(--err-bg); }
 
 .holdings-sum {
