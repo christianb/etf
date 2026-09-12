@@ -422,5 +422,7 @@ footer { padding: 16px 24px 36px; max-width: 1060px; margin: 0 auto; }
 .dot-region { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
 
 .target-info { background: var(--kpi-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
-.target-vals { margin: 0 0 6px; font-size: 14px; }
-.target-info p:last-child { margin-bottom: 0; }
+.target-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.target-vals { margin: 0; font-size: 14px; }
+.target-hint { flex: 0 0 auto; margin: 0; }
+.target-hint .hint-text { top: calc(100% + 8px); left: auto; right: 0; }
