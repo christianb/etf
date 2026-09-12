@@ -225,7 +225,8 @@
     el.innerHTML = list.map(e => `
       <label class="rate-chip" data-tip="${esc(t("proj.rateTip", { year: e.inception.slice(0, 4), pct: fmtPct1(e.perf.sinceInceptionPa) }))}">
         <span class="rate-dot" style="background:${ETF_COLORS[e.id]}"></span>
-        <span class="rate-name">${esc(etfShort(e))}</span>
+        <span class="rate-name">${esc(e.wkn)}</span>
+        <span class="rate-group hold-group">${esc(t("grp." + ETFCalc.groupOf(e)))}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
         <span class="rate-unit">%</span>
       </label>`).join("");
