@@ -180,5 +180,6 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-title]").forEach(el => { el.setAttribute("title", t(el.getAttribute("data-i18n-title"))); });
   document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria"))); });
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder"))); });
-  document.querySelectorAll("#btn-lang .lang-seg").forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === I18N.current));
+  const langBtn = document.getElementById("btn-lang");
+  if (langBtn) langBtn.textContent = I18N.current === "de" ? "DE" : "EN";
 }

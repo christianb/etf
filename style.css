@@ -212,6 +212,12 @@ h3 {
 .btn-ghost:hover { color: var(--text); border-color: var(--strong); background: var(--accent-soft); }
 #btn-reset { min-width: 116px; }
 
+.lang-btn {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 7px 10px;
+}
 .lang-toggle {
   display: inline-flex;
   align-items: center;

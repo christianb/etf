@@ -428,10 +428,8 @@
   renderEtfDatalist();
 
   const langBtn = document.getElementById("btn-lang");
-  if (langBtn) langBtn.addEventListener("click", ev => {
-    const seg = ev.target && ev.target.closest ? ev.target.closest("[data-lang]") : null;
-    if (!seg || !seg.dataset || !seg.dataset.lang) return;
-    setLang(seg.dataset.lang);
+  if (langBtn) langBtn.addEventListener("click", () => {
+    setLang(I18N.current === "de" ? "en" : "de");
     state.ui.lang = I18N.current;
     save(); applyLang(); renderAll();
   });
