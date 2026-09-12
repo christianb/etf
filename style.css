@@ -339,7 +339,7 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
 
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.hold-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.hold-row { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; margin-bottom: 8px; }
 .hold-row > input, .hold-row > button { box-sizing: border-box; height: 38px; }
 .hold-row > button { display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; }
 .hold-q { width: 150px; flex: none; text-align: center; }
@@ -460,9 +460,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .region-seg { transition: width 0.25s ease; }
 
 @media (max-width: 760px) { .kpi-row { grid-template-columns: 1fr; } }
-@media (max-width: 600px) {
-  .hold-row { flex-wrap: wrap; }
+@media (max-width: 660px) {
+  .hold-name-wrap .hold-group { display: none; }
+}
+@media (max-width: 520px) {
+  .hold-name-wrap { display: none; }
   .hold-q { width: 110px; }
   .hold-v-wrap .hold-v { width: 110px; }
-  .hold-name-wrap { flex: 1 1 100%; }
+}
+@media (max-width: 380px) {
+  .hold-row { gap: 6px; }
+  .hold-q, .hold-v-wrap .hold-v { width: 88px; }
 }
