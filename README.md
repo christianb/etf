@@ -1,4 +1,4 @@
-# ETF Planner
+# ETF Portfolio Builder
 
 A personal, static single-page ETF planner for comparing, combining and planning a long-term (15+ years) sustainable ETF portfolio. No build step, no dependencies, no frameworks – plain HTML/CSS/JS.
 

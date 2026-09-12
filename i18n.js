@@ -6,7 +6,7 @@ const I18N = {
   numLocale: "de-DE",
   strings: {
     de: {
-      "app.title": 'ETF-Planer · Planung',
+      "app.title": 'ETF Portfolio Builder · Planung',
       "btn.lang": 'Sprache: Deutsch/Englisch umschalten',
       "btn.mode": 'Hell/Dunkel umschalten',
       "btn.modeAria": 'Farbmodus umschalten',
@@ -76,7 +76,7 @@ const I18N = {
       bkt: BKT_DE
     },
     en: {
-      "app.title": 'ETF-Planer · Planning',
+      "app.title": 'ETF Portfolio Builder · Planning',
       "btn.lang": 'Switch language: German/English',
       "btn.mode": 'Toggle light/dark mode',
       "btn.modeAria": 'Toggle color mode',
