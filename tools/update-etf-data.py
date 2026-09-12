@@ -311,16 +311,6 @@ def serialize(data):
 
 
 def main():
-    isins = [normalize_isin(a) for a in sys.argv[1:]]
-    isins = [i for i in isins if i]
-    if not isins:
-        sys.stderr.write("Aufruf: python3 tools/update-etf-data.py <ISIN> [<ISIN> ...]\n")
-        sys.exit(1)
-    for isin in isins:
-        if not ISIN_RE.match(isin):
-            sys.stderr.write("Ungueltige ISIN: " + isin + "\n")
-            sys.exit(1)
-
     with open(DATA_FILE, encoding="utf-8") as fh:
         raw = fh.read()
     m = re.search(r"const ETF_DATA = (\{[\s\S]*\});\s*$", raw)
@@ -328,6 +318,16 @@ def main():
         sys.stderr.write("data.js konnte nicht geparst werden\n")
         sys.exit(1)
     data = json.loads(js_object_to_json(m.group(1)))
+
+    isins = [normalize_isin(a) for a in sys.argv[1:]]
+    isins = [i for i in isins if i]
+    if not isins:
+        isins = [e.get("isin") for e in data["etfs"] if e.get("isin")]
+        print("Keine ISINs angegeben - aktualisiere alle " + str(len(isins)) + " bekannten ETFs.")
+    for isin in isins:
+        if not ISIN_RE.match(isin):
+            sys.stderr.write("Ungueltige ISIN: " + isin + "\n")
+            sys.exit(1)
 
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
