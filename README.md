@@ -40,6 +40,12 @@ Script order: `data.js → calc.js → i18n.js → shared.js → planen.js`.
 python3 tools/update-etf-data.py IE0001GSQ2O9 LU0908501058 IE00BHZPJ239
 ```
 
+Run without arguments to update **all known ETFs** from `data.js` instead:
+
+```bash
+python3 tools/update-etf-data.py
+```
+
 The script fetches current figures (`_payload.json`) and rewrites `data.js`. New ETFs are detected automatically – afterwards please review the manual fields (`id`, `color`, `defaultRate`, `marketType`, `shortName`).
 
 ## Legal disclaimer
