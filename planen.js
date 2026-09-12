@@ -208,7 +208,7 @@
     set("kpi-holdings", fmtEuro(hTotal));
     set("kpi-buy", fmtEuro(mTotal));
     const lbl = document.getElementById("kpi-proj-label");
-    if (lbl) lbl.textContent = t("kpi.proj", { year: new Date().getFullYear() + 10 });
+    if (lbl) lbl.textContent = t("kpi.proj", { year: new Date().getFullYear() + 15 });
     set("kpi-proj", projLast ? fmtEuro(projLast.total) : "–");
   }
 
@@ -266,7 +266,7 @@
       updateKpis(null);
       return;
     }
-    const years = [0, 1, 2, 3, 5, 7, 10];
+    const years = [0, 1, 3, 5, 10, 15];
     const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
     const startYear = new Date().getFullYear();
     const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
