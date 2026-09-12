@@ -427,7 +427,6 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
   transition: opacity 0.12s, visibility 0.12s;
 }
 .rate-chip:hover::after, .rate-chip:focus-within::after { opacity: 1; visibility: visible; }
-.rate-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
 .rate-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
 .rate-chip .rate-v { width: 52px; box-sizing: border-box; height: 28px; padding: 2px 6px; text-align: center; }
 .rate-unit { color: var(--muted); font-size: 13px; }
