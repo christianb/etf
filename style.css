@@ -88,28 +88,6 @@ header {
   flex-wrap: wrap;
 }
 
-.sec-nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.sec-nav::-webkit-scrollbar { display: none; }
-.sec-nav-link {
-  position: relative;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  text-decoration: none;
-  white-space: nowrap;
-  border-radius: 999px;
-  transition: color 0.15s;
-}
-.sec-nav-link:hover { color: var(--text); }
-.sec-nav-link.active { color: var(--accent); background: var(--accent-soft); }
-
 h1 {
   margin: 0;
   font-size: 21px;
@@ -120,8 +98,7 @@ h1 {
 
 main { max-width: 1160px; margin: 0 auto; padding: 28px 24px 8px; }
 
-section { margin-bottom: 34px; scroll-margin-top: var(--nav-offset, 130px); }
-html { scroll-behavior: smooth; }
+section { margin-bottom: 34px; }
 h2 {
   font-size: 18px;
   font-weight: 700;
