@@ -74,7 +74,16 @@
   <section id="projection">
     <h2><span data-i18n="sec.proj">Depot-Entwicklung</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.projHint">Zeigt, wie sich dein Depot entwickeln könnte: Bestand plus Sparplan, mit deinen Rendite-Annahmen.</span></div></h2>
     <div class="card">
-      <div class="table-wrap"><table id="proj-table"></table></div>
+      <div class="proj-view-head">
+        <div class="lang-toggle" id="proj-view" role="group" data-i18n-aria="proj.viewAria">
+          <button type="button" class="lang-seg" data-proj-view="value" data-i18n="proj.viewValue">Wert</button>
+          <button type="button" class="lang-seg" data-proj-view="region" data-i18n="proj.viewRegion">Regionen</button>
+          <button type="button" class="lang-seg" data-proj-view="table" data-i18n="proj.viewTable">Tabelle</button>
+        </div>
+      </div>
+      <div id="proj-chart" class="proj-chart" hidden></div>
+      <div id="proj-legend" class="legend chart-legend" hidden></div>
+      <div class="table-wrap" id="proj-table-wrap"><table id="proj-table"></table></div>
       <div class="proj-foot">
         <div class="proj-col">
           <div class="proj-col-head">

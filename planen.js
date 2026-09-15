@@ -2,16 +2,21 @@
   const LS_KEY = "etfplaner.v1";
   const DEFAULT_RATES = Object.fromEntries(ETFS.map(e => [e.id, e.defaultRate]));
 
+  const PROJ_VIEWS = ["value", "region", "table"];
+  const PROJ_YEARS = Array.from({ length: 16 }, (_, i) => i);
+  const TABLE_YEARS = [0, 1, 3, 5, 10, 15];
+
   const state = load() || {
     purchases: [],
     holdings: [],
     rates: Object.assign({}, DEFAULT_RATES),
     rateMode: "perEtf",
     rateSingle: 8,
-    ui: { mode: null, lang: "de" }
+    ui: { mode: null, lang: "de", projView: "value" }
   };
-  if (!state.ui) state.ui = { mode: null, lang: "de" };
+  if (!state.ui) state.ui = { mode: null, lang: "de", projView: "value" };
   if (!state.ui.lang) state.ui.lang = "de";
+  if (PROJ_VIEWS.indexOf(state.ui.projView) === -1) state.ui.projView = "value";
   if (state.rateMode !== "single") state.rateMode = "perEtf";
   if (!Number.isFinite(state.rateSingle) || state.rateSingle < 0) state.rateSingle = 8;
   setLang(state.ui.lang);
@@ -40,7 +45,11 @@
         rates: Object.assign({}, DEFAULT_RATES, s.rates),
         rateMode: s.rateMode === "single" ? "single" : "perEtf",
         rateSingle: Number.isFinite(Number(s.rateSingle)) ? Math.max(0, Number(s.rateSingle)) : 8,
-        ui: { mode: ui.mode === "dark" || ui.mode === "light" ? ui.mode : null, lang: ui.lang === "en" ? "en" : "de" }
+        ui: {
+          mode: ui.mode === "dark" || ui.mode === "light" ? ui.mode : null,
+          lang: ui.lang === "en" ? "en" : "de",
+          projView: PROJ_VIEWS.indexOf(ui.projView) === -1 ? "value" : ui.projView
+        }
       };
     } catch (e) { return null; }
   }
@@ -290,6 +299,94 @@
       : ETFS.map(e => state.rates[e.id] || 0);
   }
 
+  function renderYearTable(proj) {
+    const table = document.getElementById("proj-table");
+    const startYear = new Date().getFullYear();
+    const pick = TABLE_YEARS.map(y => proj[y]);
+    const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
+    const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${TABLE_YEARS.map(y => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
+    const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${pick.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
+      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${pick.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
+    table.innerHTML = head + rows;
+  }
+
+  let currentChart = null;
+
+  function chartLegendHTML(entries, idx) {
+    const year = currentChart ? currentChart.labels[idx] : "";
+    const items = entries.map(e => {
+      const val = e.pct ? `${fmtPct1(e.pct[idx])} · ${fmtEuro(e.values[idx])}` : fmtEuro(e.values[idx]);
+      return `<div class="legend-item"><span class="dot" style="background:${e.color}"></span>${esc(e.label)} · ${val}</div>`;
+    });
+    if (entries.length && entries[0].pct) {
+      const rest = 100 - entries.reduce((s, e) => s + e.pct[idx], 0);
+      if (rest > 0.04) items.push(`<div class="legend-item legend-note" title="${esc(t("proj.chartOtherTip"))}"><span class="dot"></span>${esc(t("proj.chartOther"))} · ${fmtPct1(rest)}</div>`);
+    }
+    return `<span class="chart-legend-year">${esc(t("proj.chartYear", { year }))}</span>` + items.join("");
+  }
+
+  function valueSeries(proj) {
+    const series = [
+      { key: "paid", label: t("proj.chartPaid"), color: "var(--accent)", values: proj.map(p => p.paidIn) },
+      { key: "gain", label: t("proj.chartGain"), color: "var(--green)", values: proj.map(p => p.gain) }
+    ];
+    return { series, entries: series.concat([{ key: "total", label: t("proj.depot"), color: "var(--text)", values: proj.map(p => p.total) }]) };
+  }
+
+  function regionSeries(proj) {
+    const series = ETFCalc.FINE.map(f => ({
+      key: f, label: t("fine." + f), color: BAR_COLORS[f],
+      values: proj.map(p => (p.fine[f] || 0) / 100 * p.total),
+      pct: proj.map(p => p.fine[f] || 0)
+    })).filter(s => s.values.some(v => v > 0.5));
+    return { series, entries: series };
+  }
+
+  function setChartYear(idx) {
+    if (!currentChart) return;
+    const i = Math.max(0, Math.min(currentChart.labels.length - 1, Number(idx) || 0));
+    if (currentChart.idx === i) return;
+    currentChart.idx = i;
+    const chartEl = document.getElementById("proj-chart");
+    if (chartEl && chartEl.querySelectorAll) chartEl.querySelectorAll(".chart-marker").forEach(m => {
+      const active = Number(m.getAttribute("data-year")) === i;
+      if (m.classList) m.classList.toggle("active", active);
+    });
+    const legendEl = document.getElementById("proj-legend");
+    if (legendEl) legendEl.innerHTML = chartLegendHTML(currentChart.entries, i);
+  }
+
+  function renderChart(proj) {
+    const el = document.getElementById("proj-chart");
+    if (!el) return;
+    const startYear = new Date().getFullYear();
+    const labels = proj.map(p => String(startYear + p.years));
+    const isRegion = state.ui.projView === "region";
+    const built = isRegion ? regionSeries(proj) : valueSeries(proj);
+    currentChart = { labels, entries: built.entries };
+    el.innerHTML = stackedAreaSVG(labels, built.series, {
+      aria: isRegion ? t("proj.chartAriaRegion") : t("proj.chartAria"),
+      yFormat: fmtAxisEuro
+    });
+    setChartYear(labels.length - 1);
+  }
+
+  function renderProjView() {
+    const view = state.ui.projView;
+    const box = document.getElementById("proj-view");
+    if (box && box.querySelectorAll) box.querySelectorAll("[data-proj-view]").forEach(b => {
+      const active = b.getAttribute("data-proj-view") === view;
+      if (b.classList) b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
+    const chart = document.getElementById("proj-chart");
+    const legend = document.getElementById("proj-legend");
+    const wrap = document.getElementById("proj-table-wrap");
+    if (chart) chart.hidden = view === "table";
+    if (legend) legend.hidden = view === "table" || !currentChart;
+    if (wrap) wrap.hidden = view !== "table";
+  }
+
   function updateProjection() {
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
@@ -298,20 +395,22 @@
     const rates = ratesArray();
     const hasInput = holdings.some(v => v > 0) || monthly.some(v => v > 0);
     const table = document.getElementById("proj-table");
+    const chart = document.getElementById("proj-chart");
     if (!hasInput) {
+      currentChart = null;
       table.innerHTML = `<tr><td class="muted">${esc(t("proj.empty"))}</td></tr>`;
+      if (chart) chart.innerHTML = `<div class="muted proj-chart-empty">${esc(t("proj.empty"))}</div>`;
+      const legend = document.getElementById("proj-legend");
+      if (legend) legend.innerHTML = "";
       updateKpis(null);
+      renderProjView();
       return;
     }
-    const years = [0, 1, 3, 5, 10, 15];
-    const proj = ETFCalc.project(ETFS, holdings, monthly, rates, years);
-    const startYear = new Date().getFullYear();
-    const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
-    const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${years.map((y, i) => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
-    const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${proj.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
-      + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${proj.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
-        table.innerHTML = head + rows;
+    const proj = ETFCalc.project(ETFS, holdings, monthly, rates, PROJ_YEARS);
+    renderYearTable(proj);
+    renderChart(proj);
     updateKpis(proj[proj.length - 1]);
+    renderProjView();
   }
 
   // --- Init ---
@@ -443,6 +542,33 @@
     state.rateMode = mode;
     save(); renderProjRates(); updateProjection();
   });
+
+  const projViewEl = document.getElementById("proj-view");
+  if (projViewEl) projViewEl.addEventListener("click", ev => {
+    const seg = ev.target && ev.target.closest ? ev.target.closest("[data-proj-view]") : null;
+    if (!seg) return;
+    const view = seg.getAttribute ? seg.getAttribute("data-proj-view") : null;
+    if (PROJ_VIEWS.indexOf(view) === -1 || view === state.ui.projView) return;
+    state.ui.projView = view;
+    save(); updateProjection();
+  });
+
+  function chartHitFrom(target) {
+    return target && target.closest ? target.closest("[data-year]") : null;
+  }
+  const chartHoverEl = document.getElementById("proj-chart");
+  if (chartHoverEl) {
+    chartHoverEl.addEventListener("mousemove", ev => {
+      const hit = chartHitFrom(ev.target);
+      if (hit && hit.getAttribute) setChartYear(hit.getAttribute("data-year"));
+    });
+    chartHoverEl.addEventListener("touchmove", ev => {
+      const touch = ev.touches && ev.touches[0];
+      if (!touch || typeof document.elementFromPoint !== "function") return;
+      const hit = chartHitFrom(document.elementFromPoint(touch.clientX, touch.clientY));
+      if (hit && hit.getAttribute) setChartYear(hit.getAttribute("data-year"));
+    }, { passive: true });
+  }
 
   document.addEventListener("wheel", ev => {
     const t = ev.target;

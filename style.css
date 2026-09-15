@@ -461,3 +461,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .hold-row { gap: 6px; }
   .hold-q, .hold-v-wrap .hold-v { width: 88px; }
 }
+.proj-view-head { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+#proj-view { flex: none; }
+.proj-chart { margin-bottom: 4px; overflow-x: auto; }
+.proj-chart svg { display: block; width: 100%; height: auto; min-width: 520px; }
+.proj-chart .chart-grid { stroke: var(--border); stroke-width: 1; }
+.proj-chart .chart-axis { fill: var(--muted); font-size: 11px; }
+#proj-legend { margin-top: 10px; }
+.proj-chart[hidden], #proj-legend[hidden], #proj-table-wrap[hidden] { display: none; }
+.proj-chart-empty { padding: 26px 4px; text-align: center; }
+@media (max-width: 520px) { .proj-chart .chart-axis { font-size: 10px; } }
+.proj-chart .chart-marker { display: none; }
+.proj-chart .chart-marker.active { display: block; }
+.proj-chart .chart-cursor { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.proj-chart .chart-dot { stroke: var(--card); stroke-width: 1.5; }
+.chart-legend-year { font-weight: 600; color: var(--text); margin-right: 4px; }
+.legend-note { color: var(--muted); }
+.legend-note .dot { background: transparent; border: 1px dashed var(--muted); box-sizing: border-box; }
