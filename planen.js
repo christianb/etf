@@ -12,9 +12,9 @@
     rates: Object.assign({}, DEFAULT_RATES),
     rateMode: "perEtf",
     rateSingle: 8,
-    ui: { mode: null, lang: "de", projView: "value" }
+    ui: { mode: null, lang: "de", projView: "value", projNet: true }
   };
-  if (!state.ui) state.ui = { mode: null, lang: "de", projView: "value" };
+  if (!state.ui) state.ui = { mode: null, lang: "de", projView: "value", projNet: true };
   if (!state.ui.lang) state.ui.lang = "de";
   if (PROJ_VIEWS.indexOf(state.ui.projView) === -1) state.ui.projView = "value";
   if (state.rateMode !== "single") state.rateMode = "perEtf";
@@ -48,7 +48,8 @@
         ui: {
           mode: ui.mode === "dark" || ui.mode === "light" ? ui.mode : null,
           lang: ui.lang === "en" ? "en" : "de",
-          projView: PROJ_VIEWS.indexOf(ui.projView) === -1 ? "value" : ui.projView
+          projView: PROJ_VIEWS.indexOf(ui.projView) === -1 ? "value" : ui.projView,
+          projNet: ui.projNet !== false
         }
       };
     } catch (e) { return null; }
@@ -282,7 +283,7 @@
       return;
     }
     el.innerHTML = list.map(e => `
-      <label class="rate-chip" data-tip="${esc(t("proj.rateTip", { year: e.inception.slice(0, 4), pct: fmtPct1(e.perf.sinceInceptionPa) }))}">
+      <label class="rate-chip" data-tip="${esc(t("proj.rateTip", { year: e.inception.slice(0, 4), pct: fmtPct1(e.perf.sinceInceptionPa) }))} · ${esc(t("rate.net", { pct: fmtPct1((state.rates[e.id] || 0) - (e.ter || 0)) }))}">
         <span class="rate-name">${esc(e.wkn)}</span>
         <span class="rate-group hold-group"${groupBadgeAttr(ETFCalc.groupOf(e))}>${esc(t("grp." + ETFCalc.groupOf(e)))}</span>
         <input class="rate-v" type="number" id="rate-${e.id}" min="0" max="20" step="0.1" value="${state.rates[e.id]}">
@@ -309,6 +310,7 @@
     const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
     const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${TABLE_YEARS.map(y => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
     const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${pick.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
+      + (isNet() ? `<tr><td>${esc(t("proj.tax"))}</td>${pick.map(p => `<td class="num">${fmtEuro(p.tax)}</td>`).join("")}</tr>` : "")
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${pick.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
     table.innerHTML = head + rows;
   }
@@ -333,7 +335,9 @@
       { key: "paid", label: t("proj.chartPaid"), color: "var(--accent)", values: proj.map(p => p.paidIn) },
       { key: "gain", label: t("proj.chartGain"), color: "var(--green)", values: proj.map(p => p.gain) }
     ];
-    return { series, entries: series.concat([{ key: "total", label: t("proj.depot"), color: "var(--text)", values: proj.map(p => p.total) }]) };
+    const entries = series.concat([{ key: "total", label: t("proj.depot"), color: "var(--text)", values: proj.map(p => p.total) }]);
+    if (isNet()) entries.push({ key: "tax", label: t("proj.tax"), color: "var(--muted)", values: proj.map(p => p.tax) });
+    return { series, entries };
   }
 
   function regionSeries(proj) {
@@ -390,7 +394,22 @@
     if (wrap) wrap.hidden = view !== "table";
   }
 
+  function isNet() { return state.ui.projNet !== false; }
+
+  function renderProjNet() {
+    const box = document.getElementById("proj-net");
+    if (box && box.querySelectorAll) box.querySelectorAll("[data-proj-net]").forEach(b => {
+      const val = b.getAttribute("data-proj-net");
+      const active = (val === "net") === isNet();
+      if (b.classList) b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
+    const note = document.getElementById("rate-note");
+    if (note) note.hidden = !isNet();
+  }
+
   function updateProjection() {
+    renderProjNet();
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
     const holdings = ETFS.map(e => hById[e.id] || 0);
@@ -409,7 +428,7 @@
       renderProjView();
       return;
     }
-    const proj = ETFCalc.project(ETFS, holdings, monthly, rates, PROJ_YEARS);
+    const proj = ETFCalc.project(ETFS, holdings, monthly, rates, PROJ_YEARS, isNet() ? { ter: true, tax: true } : {});
     renderYearTable(proj);
     renderChart(proj);
     updateKpis(proj[proj.length - 1]);
@@ -544,6 +563,16 @@
     if (mode === state.rateMode) return;
     state.rateMode = mode;
     save(); renderProjRates(); updateProjection();
+  });
+
+  const netEl = document.getElementById("proj-net");
+  if (netEl) netEl.addEventListener("click", ev => {
+    const seg = ev.target && ev.target.closest ? ev.target.closest("[data-proj-net]") : null;
+    if (!seg) return;
+    const next = seg.getAttribute("data-proj-net") === "net";
+    if (next === isNet()) return;
+    state.ui.projNet = next;
+    save(); updateProjection();
   });
 
   const projViewEl = document.getElementById("proj-view");

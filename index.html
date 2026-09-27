@@ -75,6 +75,10 @@
     <h2><span data-i18n="sec.proj">Depot-Entwicklung</span> <div class="hint"><button class="hint-btn" type="button" data-i18n-aria="hint.aria">?</button><span class="hint-text" data-i18n="sec.projHint">Zeigt, wie sich dein Depot entwickeln könnte: Bestand plus Sparplan, mit deinen Rendite-Annahmen.</span></div></h2>
     <div class="card">
       <div class="proj-view-head">
+        <div class="lang-toggle" id="proj-net" role="group" data-i18n-aria="net.aria">
+          <button type="button" class="lang-seg" data-proj-net="gross" data-i18n="net.gross">Brutto</button>
+          <button type="button" class="lang-seg" data-proj-net="net" data-i18n="net.net">Netto</button>
+        </div>
         <div class="lang-toggle" id="proj-view" role="group" data-i18n-aria="proj.viewAria">
           <button type="button" class="lang-seg" data-proj-view="value" data-i18n="proj.viewValue">Wert</button>
           <button type="button" class="lang-seg" data-proj-view="region" data-i18n="proj.viewRegion">Regionen</button>
@@ -94,6 +98,7 @@
             </div>
           </div>
           <div id="proj-rates" class="rate-chips"></div>
+          <div id="rate-note" class="rate-note" data-i18n="rate.taxNote"></div>
         </div>
         <div class="proj-col">
           <h3 data-i18n="sub.target">Empfohlene Zielverteilung</h3>

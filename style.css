@@ -382,6 +382,13 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
+.rate-note {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+#rate-note[hidden] { display: none; }
 .rate-chip {
   position: relative;
   display: inline-flex;
@@ -462,7 +469,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .hold-row { gap: 6px; }
   .hold-q, .hold-v-wrap .hold-v { width: 88px; }
 }
-.proj-view-head { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.proj-view-head { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 #proj-view { flex: none; }
 .proj-chart { margin-bottom: 4px; overflow-x: auto; }
 .proj-chart svg { display: block; width: 100%; height: auto; min-width: 520px; }

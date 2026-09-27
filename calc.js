@@ -8,6 +8,19 @@ const ETFCalc = (() => {
     suedamerika: "Südamerika", afrika: "Afrika", australien: "Australien/Ozeanien"
   };
 
+  const TAX = { abgeltung: 25, soli: 5.5, kirchensteuer: 0, teilfreistellung: 30, sparerPauschbetrag: 1000 };
+
+  function effectiveTaxRate(t) {
+    const abg = (t.abgeltung || 0) / 100;
+    return abg + abg * ((t.soli || 0) / 100) + abg * ((t.kirchensteuer || 0) / 100);
+  }
+
+  function taxForGain(gain, t) {
+    if (!(gain > 0)) return 0;
+    const taxable = gain * (1 - (t.teilfreistellung || 0) / 100) - (t.sparerPauschbetrag || 0);
+    return taxable > 0 ? taxable * effectiveTaxRate(t) : 0;
+  }
+
   function macroOf(etf) {
     if (etf.marketType === "em") return { amerika: 0, europa: 0, em: 100, rest: 0 };
     const r = etf.regions;
@@ -195,25 +208,34 @@ const ETFCalc = (() => {
     return out;
   }
 
-  function project(etfs, holdings, monthly, rates, years) {
+  function project(etfs, holdings, monthly, rates, years, opts) {
+    opts = opts || {};
+    const useTer = !!opts.ter;
+    const useTax = !!opts.tax;
+    const tax = Object.assign({}, TAX, opts.taxParams || {});
     const H0 = holdings.reduce((s, v) => s + v, 0);
     const M = monthly.reduce((s, v) => s + v, 0);
     return years.map(n => {
       const months = n * 12;
       const values = etfs.map((e, i) => {
-        const rm = (rates[i] || 0) / 100 / 12;
+        const r = (rates[i] || 0) - (useTer ? (e.ter || 0) : 0);
+        const rm = r / 100 / 12;
         const g = rm === 0 ? 1 : Math.pow(1 + rm, months);
         const annuity = rm === 0 ? (monthly[i] || 0) * months : (monthly[i] || 0) * (g - 1) / rm;
         return holdings[i] * g + annuity;
       });
-      const total = values.reduce((s, v) => s + v, 0);
+      const totalGross = values.reduce((s, v) => s + v, 0);
       const paidIn = H0 + M * months;
+      const gainGross = totalGross - paidIn;
+      const taxAmt = useTax ? taxForGain(gainGross, tax) : 0;
+      const total = totalGross - taxAmt;
+      const gain = total - paidIn;
       const agg = aggregate(etfs.map((e, i) => ({ etf: e, value: values[i] })).filter(x => x.value > 0));
-      return { years: n, total, paidIn, gain: total - paidIn, values, fine: agg.fine, macro: agg.macro };
+      return { years: n, total, totalGross, paidIn, gain, gainGross, tax: taxAmt, values, fine: agg.fine, macro: agg.macro };
     });
   }
 
-  return { BUCKETS, FINE, BUCKET_LABELS, FINE_LABELS, macroOf, groupOf, aggregate, solve, project, parseEuro, parseHoldings, parseTargets };
+  return { BUCKETS, FINE, BUCKET_LABELS, FINE_LABELS, TAX, effectiveTaxRate, taxForGain, macroOf, groupOf, aggregate, solve, project, parseEuro, parseHoldings, parseTargets };
 })();
 
 if (typeof module !== "undefined") module.exports = ETFCalc;
