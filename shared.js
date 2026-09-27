@@ -9,6 +9,7 @@ function fmtEuro(v) {
 }
 const fmtPct = v => v == null ? "—" : (Number(v) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
 const fmtPct1 = v => ((Number(v) || 0) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
+const fmtPct2 = v => ((Number(v) || 0) / 100).toLocaleString(I18N.numLocale, { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u00a0/g, " ");
 const fmtPerf = v => v == null ? '<span class="muted">—</span>' : `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : ""}${v.toLocaleString(I18N.numLocale, { maximumFractionDigits: 2 })} %</span>`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const fmtAxisEuro = v => {

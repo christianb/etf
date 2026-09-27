@@ -361,6 +361,7 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
   font-size: 14px;
 }
 .holdings-sum .sum-label { color: var(--muted); font-weight: 500; }
+.holdings-sum .sum-ter { color: var(--muted); font-weight: 500; }
 .holdings-sum .sum-value { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .holdings-sum .sum-hint { font-size: 12px; width: 100%; }
 

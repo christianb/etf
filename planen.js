@@ -113,7 +113,7 @@
         : `<button class="icon-btn icon-del" data-act="del" data-idx="${i}" title="${esc(t("row.del"))}">${ICON_TRASH}</button>`}
       <input class="hold-q${known ? "" : " input-err"}" data-idx="${i}" data-field="q" value="${esc(r.q)}" placeholder="${esc(t("row.wkn"))}" autocomplete="off" list="etf-list">
       <span class="hold-name-wrap" data-idx="${i}">
-        <span class="hold-name" data-idx="${i}" title="${e ? esc(e.name) : ""}">${e ? esc(e.name) : ""}</span>
+        <span class="hold-name" data-idx="${i}" title="${e ? esc(t("row.terTip", { name: e.name, pct: fmtPct2(e.ter) })) : ""}">${e ? esc(e.name) : ""}</span>
         <span class="hold-group${e ? "" : " is-hidden"}"${e ? groupBadgeAttr(ETFCalc.groupOf(e)) : ""} data-idx="${i}">${e ? esc(t("grp." + ETFCalc.groupOf(e))) : ""}</span>
       </span>
       <span class="hold-v-wrap${e ? "" : " is-hidden"}" data-idx="${i}">
@@ -141,7 +141,7 @@
         const nameEl = el.querySelector ? el.querySelector('.hold-name[data-idx="' + d.idx + '"]') : null;
         if (nameEl) {
           nameEl.textContent = e ? e.name : "";
-          if (e) nameEl.setAttribute("title", e.name); else nameEl.removeAttribute("title");
+          if (e) nameEl.setAttribute("title", t("row.terTip", { name: e.name, pct: fmtPct2(e.ter) })); else nameEl.removeAttribute("title");
         }
         const grpEl = el.querySelector ? el.querySelector('.hold-group[data-idx="' + d.idx + '"]') : null;
         if (grpEl) {
@@ -197,7 +197,10 @@
     const total = Object.values(byId).reduce((s, v) => s + v, 0);
     const positions = Object.values(byId).filter(v => v > 0).length;
     const unknown = unknownRows(rows);
-    document.getElementById(elId).innerHTML = `<span class="sum-label">${label} · ${positions} ${tpl("sum.pos", positions)}</span><span class="sum-value">${fmtEuro(total)}</span>`
+    const items = ETFS.map(e => ({ etf: e, value: byId[e.id] || 0 })).filter(i => i.value > 0);
+    const ter = ETFCalc.aggregate(items).ter;
+    const terHtml = total > 0 ? ` · <span class="sum-ter">${esc(t("sum.ter", { pct: fmtPct2(ter) }))}</span>` : "";
+    document.getElementById(elId).innerHTML = `<span class="sum-label">${label} · ${positions} ${tpl("sum.pos", positions)}${terHtml}</span><span class="sum-value">${fmtEuro(total)}</span>`
       + (unknown ? `<span class="muted sum-hint">(${unknown} ${tpl("sum.unk", unknown)})</span>` : "");
   }
 
