@@ -30,6 +30,7 @@ const ETFCalc = (() => {
   const GROUP_RULES = [
     ["europa", /\b(emu|eurozone|euro ?stoxx|stoxx|dax|mdax)\b|europe|europa/i],
     ["em", /\bem\b|emerging|schwellenl/i],
+    ["allworld", /all[-\s]?world|acwi|all[-\s]?cap/i],
     ["world", /world|global|all ?cap|acwi|all ?world/i]
   ];
 

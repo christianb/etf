@@ -97,10 +97,10 @@
   const ICON_PLUS = `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
   const ICON_TRASH = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6.5 2h3M4 4l.8 10h6.4L12 4M6.5 7v4M9.5 7v4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
   const ICON_LINK = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 7 9M11 9.5V13H3V5h3.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const GROUP_REGION = { world: "nordamerika", europa: "europa", em: "asien" };
+  const GROUP_COLOR = { world: BAR_COLORS.nordamerika, allworld: "#8b5cf6", europa: BAR_COLORS.europa, em: BAR_COLORS.asien };
 
   function groupBadgeStyle(g) {
-    return "--grp:" + BAR_COLORS[GROUP_REGION[g]];
+    return "--grp:" + (GROUP_COLOR[g] || GROUP_COLOR.world);
   }
   function groupBadgeAttr(g) {
     return ` style="${groupBadgeStyle(g)}"`;
@@ -268,7 +268,7 @@
     renderRateMode();
     const hById = sumById(state.holdings);
     const pById = sumById(state.purchases);
-    const GROUP_ORDER = { world: 0, europa: 1, em: 2 };
+    const GROUP_ORDER = { world: 0, allworld: 1, europa: 2, em: 3 };
     const list = ETFS.filter(e => (hById[e.id] || 0) > 0 || (pById[e.id] || 0) > 0)
       .sort((a, b) => GROUP_ORDER[ETFCalc.groupOf(a)] - GROUP_ORDER[ETFCalc.groupOf(b)]);
     const el = document.getElementById("proj-rates");
