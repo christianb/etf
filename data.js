@@ -1,5 +1,5 @@
 const ETF_DATA = {
-  asOf: "2026-09-10",
+  asOf: "2026-09-24",
   etfs: [
     {
       id: "world",
@@ -184,6 +184,29 @@ const ETF_DATA = {
       maxDd1y: -17.59,
       regions: { nordamerika: 3.10, europa: 3.37, asien: 83.79, australien: 0, suedamerika: 6.06, afrika: 3.37 },
       link: "https://www.finanzfluss.de/informer/etf/ie00bmg6z448/"
+    },
+    {
+      id: "ftse-all-world",
+      color: "#f97316",
+      defaultRate: 8.0,
+      name: "Vanguard FTSE All-World UCITS ETF (USD) Accumulating",
+      shortName: "FTSE All-World",
+      isin: "IE00BK5BQT80",
+      wkn: "A2PKXG",
+      ticker: "VWCE",
+      ter: 0.14,
+      fundCurrency: "USD",
+      tradingCurrency: "EUR",
+      replication: "physisch",
+      distribution: "thesaurierend",
+      inception: "2019-07-23",
+      volume: 73.45,
+      marketType: "dm",
+      perf: { y1: 18.12, y3: 21.50, y5: 11.06, sinceInceptionTotal: 141.03, sinceInceptionPa: 13.39 },
+      vol1y: 11.41,
+      maxDd1y: -6.55,
+      regions: { nordamerika: 64.84, europa: 14.11, asien: 18.37, australien: 1.62, suedamerika: 0.65, afrika: 0.35 },
+      link: "https://www.finanzfluss.de/informer/etf/ie00bk5bqt80/"
     }
   ]
 };

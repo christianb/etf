@@ -96,6 +96,7 @@
   // --- generischer Zeilen-Editor (Bestand + Kauf-Rechner) ---
   const ICON_PLUS = `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
   const ICON_TRASH = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6.5 2h3M4 4l.8 10h6.4L12 4M6.5 7v4M9.5 7v4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
+  const ICON_LINK = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 7 9M11 9.5V13H3V5h3.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const GROUP_REGION = { world: "nordamerika", europa: "europa", em: "asien" };
 
   function groupBadgeStyle(g) {
@@ -117,6 +118,7 @@
         <span class="hold-name" data-idx="${i}" title="${e ? esc(t("row.terTip", { name: e.name, pct: fmtPct2(e.ter) })) : ""}">${e ? esc(e.name) : ""}</span>
         <span class="hold-group${e ? "" : " is-hidden"}"${e ? groupBadgeAttr(ETFCalc.groupOf(e)) : ""} data-idx="${i}">${e ? esc(t("grp." + ETFCalc.groupOf(e))) : ""}</span>
       </span>
+      <a class="icon-btn hold-link${e ? "" : " is-hidden"}" data-idx="${i}"${e ? ` href="${esc(e.link)}"` : ""} target="_blank" rel="noopener noreferrer" title="${esc(t("row.finanzfluss"))}" aria-label="${esc(t("row.finanzfluss"))}">${ICON_LINK}</a>
       <span class="hold-v-wrap${e ? "" : " is-hidden"}" data-idx="${i}">
         <span class="hold-v-euro">€</span>
         <input class="hold-v" type="number" data-idx="${i}" data-field="v" min="0" step="100" value="${r.v}" placeholder="${esc(t("row.amt"))}">
@@ -159,6 +161,12 @@
         }
         const vWrap = el.querySelector ? el.querySelector('.hold-v-wrap[data-idx="' + d.idx + '"]') : null;
         if (vWrap && vWrap.classList) vWrap.classList.toggle("is-hidden", !e);
+        const linkEl = el.querySelector ? el.querySelector('.hold-link[data-idx="' + d.idx + '"]') : null;
+        if (linkEl) {
+          if (e && e.link) linkEl.setAttribute("href", e.link);
+          else if (linkEl.removeAttribute) linkEl.removeAttribute("href");
+          if (linkEl.classList) linkEl.classList.toggle("is-hidden", !e);
+        }
       } else if (d.field === "v") {
         row.v = Math.max(0, parseFloat(ev.target.value) || 0);
       } else return;
