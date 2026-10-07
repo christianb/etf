@@ -391,6 +391,24 @@ footer { padding: 16px 24px 36px; max-width: 1160px; margin: 0 auto; }
   line-height: 1.45;
 }
 #rate-note[hidden] { display: none; }
+
+#proj-table td.hint-cell { position: relative; cursor: help; }
+.wd-tip {
+  position: fixed;
+  z-index: 60;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1px solid var(--strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-line;
+  pointer-events: none;
+}
+.wd-tip[hidden] { display: none; }
 .rate-chip {
   position: relative;
   display: inline-flex;

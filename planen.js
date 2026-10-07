@@ -312,6 +312,74 @@
       : ETFS.map(e => state.rates[e.id] || 0);
   }
 
+  let wdTip = null;
+
+  function wdTipEl() {
+    if (wdTip || !document.createElement) return wdTip;
+    const el = document.createElement("div");
+    el.className = "wd-tip";
+    el.hidden = true;
+    if (document.body && document.body.appendChild) document.body.appendChild(el);
+    wdTip = el;
+    return el;
+  }
+
+  function hideWdTip() {
+    const el = wdTipEl();
+    if (el) el.hidden = true;
+  }
+
+  function showWdTip(target) {
+    const el = wdTipEl();
+    if (!el) return;
+    const text = target.getAttribute("data-tip");
+    if (!text) return;
+    el.textContent = text;
+    el.hidden = false;
+    const r = target.getBoundingClientRect ? target.getBoundingClientRect() : null;
+    const winW = window.innerWidth || 1024;
+    const w = el.offsetWidth || 320;
+    const h = el.offsetHeight || 60;
+    const left = Math.max(8, Math.min(winW - w - 8, (r ? r.left : 8)));
+    const below = r ? r.bottom + 8 : 8;
+    const above = r ? r.top - h - 8 : 8;
+    el.style.left = left + "px";
+    el.style.top = (below + h < window.innerHeight ? below : Math.max(8, above)) + "px";
+  }
+
+  function bindWdTip(table) {
+    if (!table || !table.addEventListener || table._wdTipBound) return;
+    table._wdTipBound = true;
+    const findCell = ev => {
+      const el = ev && ev.target;
+      if (!el || !el.closest) return null;
+      const cell = el.closest("td.hint-cell");
+      if (cell) return cell;
+      const row = el.closest("tr");
+      return row ? row.querySelector("td.hint-cell") : null;
+    };
+    const move = ev => {
+      const cell = findCell(ev);
+      if (cell) showWdTip(cell); else hideWdTip();
+    };
+    table.addEventListener("mousemove", move);
+    table.addEventListener("mouseleave", hideWdTip);
+    table.addEventListener("focusin", ev => {
+      const cell = findCell(ev);
+      if (cell) showWdTip(cell); else hideWdTip();
+    });
+    table.addEventListener("focusout", hideWdTip);
+    if (window && window.addEventListener) {
+      window.addEventListener("scroll", hideWdTip, true);
+      window.addEventListener("resize", hideWdTip);
+    }
+  }
+
+  function hintCell(labelKey, tipKey) {
+    const label = t(labelKey), tip = t(tipKey);
+    return `<td class="hint-cell" tabindex="0" data-tip="${esc(tip)}" aria-label="${esc(label + ": " + tip)}">${esc(label)}`;
+  }
+
   function renderYearTable(proj) {
     const table = document.getElementById("proj-table");
     const startYear = new Date().getFullYear();
@@ -319,10 +387,11 @@
     const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
     const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${TABLE_YEARS.map(y => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
     const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${pick.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
-      + `<tr><td>${esc(t("proj.withdraw"))}</td>${pick.map(p => `<td class="num">${fmtEuro(p.total * WD_RATE / 100 / 12)}</td>`).join("")}</tr>`
-      + (isNet() ? `<tr><td>${esc(t("proj.tax"))}</td>${pick.map(p => `<td class="num">${fmtEuro(p.tax)}</td>`).join("")}</tr>` : "")
+      + `<tr>${hintCell("proj.withdraw", "proj.withdrawNote")}</td>${pick.map(p => `<td class="num">${fmtEuro(p.total * WD_RATE / 100 / 12)}</td>`).join("")}</tr>`
+      + (isNet() ? `<tr>${hintCell("proj.tax", "proj.withdrawNote")}</td>${pick.map(p => `<td class="num">${fmtEuro(p.tax)}</td>`).join("")}</tr>` : "")
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${pick.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
     table.innerHTML = head + rows;
+    bindWdTip(table);
   }
 
   let currentChart = null;
