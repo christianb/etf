@@ -5,6 +5,7 @@
   const PROJ_VIEWS = ["value", "region", "table"];
   const PROJ_YEARS = Array.from({ length: 16 }, (_, i) => i);
   const TABLE_YEARS = [0, 1, 3, 5, 10, 15];
+  const WD_RATE = 4;
 
   const state = load() || {
     purchases: [],
@@ -318,6 +319,7 @@
     const colLabel = y => y === 0 ? `${startYear} ${t("proj.today")}` : String(startYear + y);
     const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${TABLE_YEARS.map(y => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
     const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${pick.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
+      + `<tr><td>${esc(t("proj.withdraw"))}</td>${pick.map(p => `<td class="num">${fmtEuro(p.total * WD_RATE / 100 / 12)}</td>`).join("")}</tr>`
       + (isNet() ? `<tr><td>${esc(t("proj.tax"))}</td>${pick.map(p => `<td class="num">${fmtEuro(p.tax)}</td>`).join("")}</tr>` : "")
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${pick.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
     table.innerHTML = head + rows;
