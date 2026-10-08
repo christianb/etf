@@ -388,7 +388,6 @@
     const head = `<tr><th>${esc(t("proj.colMetric"))}</th>${TABLE_YEARS.map(y => `<th class="num">${colLabel(y)}</th>`).join("")}</tr>`;
     const rows = `<tr><td><strong>${esc(t("proj.depot"))}</strong></td>${pick.map(p => `<td class="num"><strong>${fmtEuro(p.total)}</strong></td>`).join("")}</tr>`
       + `<tr>${hintCell("proj.withdraw", "proj.withdrawNote")}</td>${pick.map(p => `<td class="num">${fmtEuro(p.total * WD_RATE / 100 / 12)}</td>`).join("")}</tr>`
-      + (isNet() ? `<tr>${hintCell("proj.tax", "proj.withdrawNote")}</td>${pick.map(p => `<td class="num">${fmtEuro(p.tax)}</td>`).join("")}</tr>` : "")
       + ETFCalc.FINE.map(f => `<tr><td><span class="dot-region" style="background:${BAR_COLORS[f]}"></span>${t("fine." + f)}</td>${pick.map(p => `<td class="num">${fmtPct1(p.fine[f])}</td>`).join("")}</tr>`).join("");
     table.innerHTML = head + rows;
     bindWdTip(table);
