@@ -235,6 +235,7 @@
     const set = (id, txt) => { const n = document.getElementById(id); if (n) n.textContent = txt; };
     set("kpi-holdings", fmtEuro(hTotal));
     set("kpi-buy", fmtEuro(mTotal));
+    set("kpi-withdraw", fmtEuro(hTotal * WD_RATE / 100 / 12));
     const lbl = document.getElementById("kpi-proj-label");
     if (lbl) lbl.textContent = t("kpi.proj", { year: new Date().getFullYear() + 15 });
     set("kpi-proj", projLast ? fmtEuro(projLast.total) : "–");
